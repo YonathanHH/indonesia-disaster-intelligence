@@ -1,0 +1,51 @@
+# ---- secrets / env ----
+.env
+.env.*
+!.env.example
+*.env
+*.env.local
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ---- data / local stores (never commit) ----
+*.db
+*.sqlite*
+*.duckdb
+*.duckdb.wal
+
+# ---- node / next ----
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- docker / local ----
+pgdata/
+
+# ---- OS / editors ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
