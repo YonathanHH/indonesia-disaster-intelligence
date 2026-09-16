@@ -11,8 +11,12 @@ with deterministic correlation and explainable intelligence scoring layered on (
 
 ## Screenshot
 
-![BMKG Intelligence dashboard](docs/screenshot.png)
-<!-- Add a screenshot at `docs/screenshot.png` (dashboard map + event detail view). -->
+**Main Dashboard**
+<img width="1919" height="937" alt="image" src="https://github.com/user-attachments/assets/e5aba748-1ec9-4d68-b3a9-10e7a8bebd3b" />
+
+**AI Executive Summary Briefing**
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/9ac0c92f-806a-4245-b9bd-922a54ae3805" />
+
 
 ## Architecture
 
