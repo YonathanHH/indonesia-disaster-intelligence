@@ -3,7 +3,7 @@ WORKDIR /web
 COPY package.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN STANDALONE_OUTPUT=1 npm run build
 
 FROM node:20-slim
 WORKDIR /web

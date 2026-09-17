@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import type { BMKGEvent } from "../lib/types";
-import { Badge, EmptyState, SectionHead, SkeletonRows } from "./ui";
+import { Badge, EmptyState, SectionHead, SkeletonRows, TypeMark } from "./ui";
 import { fmtRel, prioColor, typeLabel } from "../lib/format";
 
 export type SortMode = "score" | "newest" | "oldest" | "magnitude";
@@ -78,7 +78,7 @@ export default function EventList({
               if (el) rowRefs.current.set(e.id, el);
               else rowRefs.current.delete(e.id);
             }}
-            className={`evrow ${e.id === selectedId ? "sel" : ""} ${e.id === hoverId ? "hl" : ""}`}
+            className={`evrow sev-${e.priority} type-${e.type} ${e.id === selectedId ? "sel" : ""} ${e.id === hoverId ? "hl" : ""}`}
             onClick={() => onSelect(e.id)}
             onMouseEnter={() => onHover(e.id)}
             onMouseLeave={() => onHover(null)}
@@ -91,10 +91,12 @@ export default function EventList({
               <span className="t">{e.title}</span>
               <span className="meta">
                 <Badge prio={e.priority} />
-                <span className="m">{typeLabel(e.type)}</span>
-                {e.magnitude != null && <span className="m">M{e.magnitude.toFixed(1)}</span>}
+                <span className="m type">
+                  <TypeMark type={e.type} />
+                  {typeLabel(e.type)}
+                </span>
+                {e.magnitude != null && <span className="m mag">M{e.magnitude.toFixed(1)}</span>}
                 {e.depth_km != null && <span className="m">{Math.round(e.depth_km)}km</span>}
-                <span className="m">{fmtRel(e.occurred_at)}</span>
                 {e.status !== "active" && <span className="chip">RESOLVED</span>}
               </span>
             </span>
@@ -102,6 +104,7 @@ export default function EventList({
               <span className="score" style={{ color: prioColor(e.priority) }}>
                 {e.score.toFixed(1)}
               </span>
+              <span className="rel">{fmtRel(e.occurred_at)}</span>
             </span>
           </button>
         ))}

@@ -1,8 +1,19 @@
 /** Small shared presentational primitives. */
 import type { ReactNode } from "react";
 
+/** Severity badge — short uppercase label on tinted fill. */
 export function Badge({ prio }: { prio: string }) {
   return <span className={`badge b-${prio}`}>{prio}</span>;
+}
+
+/** Type shape glyph: circle = earthquake, diamond = severe weather,
+ *  double-ring = tsunami, triangle = volcano. Never color-only. */
+export function TypeMark({ type, size = 8 }: { type: string; size?: number }) {
+  const cls =
+    type === "severe_weather" ? "tg tg-wx" :
+    type === "tsunami_alert" ? "tg tg-tsu" :
+    type === "volcano" ? "tg tg-volc" : "tg tg-quake";
+  return <span className={cls} style={{ width: size, height: size }} aria-hidden="true" />;
 }
 
 export function SectionHead({

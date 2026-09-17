@@ -14,6 +14,11 @@ const VOLC_COLOR: Record<string, string> = {
   NORMAL: "#2dd4a7",
 };
 
+/* Dark operational basemap (free, no key). Falls back to the MapLibre demo
+ * globe style if CARTO is unreachable — behaviour otherwise unchanged. */
+const DARK_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const FALLBACK_STYLE = "https://demotiles.maplibre.org/globe.json";
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -25,20 +30,23 @@ function zoomScale(z: number): number {
   return Math.min(1.8, Math.max(0.65, Math.round(s * 100) / 100));
 }
 
-/** One event marker: dark fill + priority-colored ring; size encodes magnitude. */
+/** One event marker: filled severity color + dark stroke; shape encodes type
+ *  (circle = quake, diamond = severe weather, ringed circle = tsunami);
+ *  size encodes magnitude for quakes. */
 function buildEventEl(e: BMKGEvent, selected: boolean): HTMLElement {
   const el = document.createElement("div");
-  const isQuake = e.type === "earthquake" || e.type === "tsunami_alert";
   const mag = e.magnitude ?? 4;
-  const size = isQuake ? Math.min(10 + mag * 4.5, 38) : 18;
+  const isWx = e.type === "severe_weather";
+  const isTsu = e.type === "tsunami_alert";
+  const size = isWx ? 15 : isTsu ? Math.min(14 + mag * 3.6, 34) : Math.min(9 + mag * 3.6, 32);
   const color = prioColor(e.priority);
-  el.className = `mk ${e.type === "severe_weather" ? "mk-wx" : ""} ${selected ? "mk-sel" : ""} ${
-    e.type === "tsunami_alert" ? "mk-pulse" : ""
+  el.className = `mk ${isWx ? "mk-wx" : isTsu ? "mk-tsu" : "mk-q"} ${selected ? "mk-sel" : ""} ${
+    isTsu ? "mk-pulse" : ""
   }`
     .trim()
     .replace(/\s+/g, " ");
-  el.style.width = `${size}px`;
-  el.style.height = `${size}px`;
+  el.style.width = `${Math.round(size)}px`;
+  el.style.height = `${Math.round(size)}px`;
   el.style.color = color; // pulse ring uses currentColor
   el.title = `${e.title} — ${e.priority} (${e.score.toFixed(1)})`;
   el.setAttribute("role", "button");
@@ -47,7 +55,9 @@ function buildEventEl(e: BMKGEvent, selected: boolean): HTMLElement {
 
   const core = document.createElement("div");
   core.className = "mk-core";
-  core.style.border = `${selected ? 2.5 : 1.5}px solid ${color}`;
+  core.style.background = color;
+  core.style.borderColor = "#06090d";
+  if (isWx) core.style.transform = "rotate(45deg) scale(var(--mk-scale, 1))";
   el.appendChild(core);
   return el;
 }
@@ -88,10 +98,20 @@ export default function Map({
     if (!ref.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: ref.current,
-      style: "https://demotiles.maplibre.org/globe.json",
+      style: DARK_STYLE,
       center: [118, -2.5],
       zoom: 4.2,
       attributionControl: { compact: true },
+    });
+    // keep the console usable offline / when CARTO is blocked
+    map.on("error", () => {
+      try {
+        const style = map.getStyle();
+        const src = (style?.sprite ?? "") as string;
+        if (!src.includes("demotiles")) map.setStyle(FALLBACK_STYLE);
+      } catch {
+        /* keep current style */
+      }
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
@@ -134,6 +154,7 @@ export default function Map({
 
   function addMarker(map: maplibregl.Map, e: BMKGEvent, isSelected: boolean) {
     const el = buildEventEl(e, isSelected);
+    const color = prioColor(e.priority);
     el.addEventListener("click", (ev) => {
       ev.stopPropagation();
       onSelectRef.current(e.id);
@@ -150,9 +171,11 @@ export default function Map({
       .setLngLat([e.longitude, e.latitude])
       .setPopup(
         new maplibregl.Popup({ offset: 14, closeButton: true }).setHTML(
-          `<div style="font-weight:700;font-size:12.5px">${escapeHtml(e.title)}</div>` +
-            `<div style="font-size:11px;color:#8fa1b5;margin-top:3px">${escapeHtml(e.type)} · ${e.priority} · score ${e.score.toFixed(1)}` +
-            (e.magnitude != null ? ` · M${e.magnitude}` : "") + `</div>`
+          `<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex:none"></span>` +
+            `<span style="font-size:9px;font-weight:800;letter-spacing:0.08em;color:${color}">${escapeHtml(e.priority)}</span>` +
+            `<span style="font-size:9px;letter-spacing:0.08em;color:#8fa1b5">${escapeHtml(e.type.toUpperCase().replace("_", " "))} · ${e.score.toFixed(1)}/10</span></div>` +
+            `<div style="font-weight:700;font-size:12.5px;margin-top:4px;line-height:1.35">${escapeHtml(e.title)}</div>` +
+            (e.magnitude != null ? `<div style="font-size:11px;color:#8fa1b5;margin-top:2px;font-family:monospace">M${e.magnitude.toFixed(1)}</div>` : "")
         )
       )
       .addTo(map);
@@ -230,14 +253,14 @@ export default function Map({
         type: "line",
         source: "plates-src",
         filter: ["!=", ["get", "boundary_type"], "subduction"],
-        paint: { "line-color": "#7c8db0", "line-width": 1.2, "line-opacity": 0.7, "line-dasharray": [3, 2] },
+        paint: { "line-color": "#5d6d80", "line-width": 1.1, "line-opacity": 0.8, "line-dasharray": [3, 2] },
       });
       map.addLayer({
         id: "plates-subduction",
         type: "line",
         source: "plates-src",
         filter: ["==", ["get", "boundary_type"], "subduction"],
-        paint: { "line-color": "#e879a9", "line-width": 2.2, "line-opacity": 0.9 },
+        paint: { "line-color": "#e879a9", "line-width": 2, "line-opacity": 0.85 },
       });
     };
     if (map.isStyleLoaded()) apply();
@@ -248,14 +271,16 @@ export default function Map({
     <div className={`mapwrap ${selectedId ? "has-selection" : ""}`}>
       <div id="map" ref={ref} role="application" aria-label="Indonesia hazard map" />
       <div className="maplegend" aria-hidden="true">
-        <span className="lg-title">Legend</span>
+        <span className="lg-title">Severity</span>
         <span className="lg-row"><span className="sw" style={{ background: "#2dd4a7" }} /> LOW</span>
         <span className="lg-row"><span className="sw" style={{ background: "#f5c518" }} /> MODERATE</span>
         <span className="lg-row"><span className="sw" style={{ background: "#ff9349" }} /> HIGH</span>
         <span className="lg-row"><span className="sw" style={{ background: "#ff5d5d" }} /> CRITICAL</span>
         <span className="lg-sep" />
-        <span className="lg-row"><span className="sw" style={{ width: 14, background: "transparent", border: "2px solid #8fa1b5" }} /> size = magnitude</span>
-        <span className="lg-row"><span className="sw sq" style={{ background: "transparent", border: "2px solid #8fa1b5" }} /> severe weather</span>
+        <span className="lg-title">Shape · type</span>
+        <span className="lg-row"><span className="sw" style={{ background: "transparent", border: "2px solid #8fa1b5" }} /> quake · size = M</span>
+        <span className="lg-row"><span className="sw dia" /> severe wx</span>
+        <span className="lg-row"><span className="sw ring" /> tsunami potential</span>
         {showVolcanoes && (
           <>
             <span className="lg-sep" />
@@ -266,7 +291,7 @@ export default function Map({
           <>
             <span className="lg-sep" />
             <span className="lg-row"><span className="ln" style={{ borderColor: "#e879a9" }} /> subduction</span>
-            <span className="lg-row"><span className="ln" style={{ borderColor: "#7c8db0" }} /> plate boundary</span>
+            <span className="lg-row"><span className="ln" style={{ borderColor: "#5d6d80" }} /> plate boundary</span>
           </>
         )}
       </div>

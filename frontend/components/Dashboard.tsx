@@ -215,6 +215,7 @@ export default function Dashboard() {
 
   const faultsOff = layers.find((l) => l.id === "faults" && !l.available);
   const rightOpen = !!selectedId || detailLoading;
+  const eventsById = useMemo(() => new globalThis.Map(events.map((e) => [e.id, e] as [string, BMKGEvent])), [events]);
 
   return (
     <div className="app">
@@ -262,7 +263,7 @@ export default function Dashboard() {
             onHover={setHoverId}
             onClearFilters={clearFilters}
           />
-          <FeedList feed={feed} onSelect={(id) => setSelectedId(id)} />
+          <FeedList feed={feed} eventsById={eventsById} onSelect={(id) => setSelectedId(id)} />
         </div>
 
         {/* center: map surface */}
@@ -306,7 +307,7 @@ export default function Dashboard() {
                 <label
                   key={l.id}
                   className="layerchk"
-                  title={l.attribution}
+                  title={l.available ? l.attribution : (l.reason ?? l.attribution)}
                   style={{ opacity: l.available ? 1 : 0.45 }}
                 >
                   <input
@@ -319,7 +320,7 @@ export default function Dashboard() {
                         : setShowPlates(e.target.checked)
                     }
                   />
-                  {l.id === "volcanoes" ? `▲ Volc${l.count != null ? ` ${l.count}` : ""}` : `≋ Plates`}
+                  {l.id === "volcanoes" ? `Volc${l.count != null ? ` ${l.count}` : ""}` : `Plates`}
                 </label>
               ))}
             {faultsOff && (

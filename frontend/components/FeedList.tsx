@@ -1,7 +1,7 @@
 "use client";
-import type { FeedItem } from "../lib/types";
-import { EmptyState, SectionHead } from "./ui";
-import { fmtRel } from "../lib/format";
+import type { BMKGEvent, FeedItem } from "../lib/types";
+import { EmptyState, SectionHead, TypeMark } from "./ui";
+import { fmtRel, typeLabel } from "../lib/format";
 
 const KIND_LABEL: Record<string, string> = {
   new_event: "NEW EVENT",
@@ -10,9 +10,11 @@ const KIND_LABEL: Record<string, string> = {
 
 export default function FeedList({
   feed,
+  eventsById,
   onSelect,
 }: {
   feed: FeedItem[];
+  eventsById: Map<string, BMKGEvent>;
   onSelect: (id: string) => void;
 }) {
   return (
@@ -25,12 +27,20 @@ export default function FeedList({
         {feed.map((f, i) => {
           const key = `${f.ts}-${f.event_id ?? f.title}-${i}`;
           const clickable = !!f.event_id;
+          const linked = (f.event_id && eventsById.get(f.event_id)) || null;
           const body = (
             <>
               <span className="bar" />
               <span style={{ minWidth: 0 }}>
                 <span className="head">
                   <span className="kind">{KIND_LABEL[f.kind] ?? f.kind.toUpperCase()}</span>
+                  {linked && (
+                    <span className="ftype">
+                      <TypeMark type={linked.type} size={7} />
+                      {typeLabel(linked.type)}
+                      {linked.magnitude != null && ` M${linked.magnitude.toFixed(1)}`}
+                    </span>
+                  )}
                   <span className="time" title={f.ts}>{fmtRel(f.ts)}</span>
                 </span>
                 <span className="t" style={{ display: "block" }}>{f.title || "—"}</span>

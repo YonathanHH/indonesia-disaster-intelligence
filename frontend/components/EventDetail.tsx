@@ -1,7 +1,7 @@
 "use client";
 import type { EventDetail, Overview } from "../lib/types";
 import { Badge, EmptyState, SkeletonRows } from "./ui";
-import { fmtClock, fmtWIB, prioColor, typeLabel } from "../lib/format";
+import { fmtClock, fmtRel, fmtWIB, prioColor, typeLabel } from "../lib/format";
 
 /** Human labels for score components (quake-v1 / weather-v1). */
 const COMP_LABEL: Record<string, string> = {
@@ -290,23 +290,31 @@ export default function EventDetail({
 export function CollectorHealth({ overview }: { overview: Overview | null }) {
   if (!overview) return null;
   const rows = Object.entries(overview.collectors);
+  const okCount = rows.filter(([, c]) => !c.last_error && c.last_ok_at).length;
   return (
     <div className="panel" style={{ height: "100%" }}>
-      <div className="panelhead"><span className="title">System status</span></div>
+      <div className="panelhead">
+        <span className="title">System status</span>
+        <span className="count">{okCount}/{rows.length} OK</span>
+      </div>
       <div className="detailbody">
-        <div className="sect" style={{ marginTop: 0 }}>Collectors</div>
+        <div className="sect" style={{ marginTop: 0 }}>
+          Collectors <span className="note">muted by design — errors surface here only</span>
+        </div>
         {rows.length === 0 && (
           <EmptyState title="No ingest runs yet" sub="Press ↻ Ingest to run the collectors." />
         )}
         {rows.map(([name, c]) => {
           const bad = !!c.last_error;
+          const fresh = c.last_ok_at ? fmtRel(c.last_ok_at) : "never";
           return (
-            <div key={name} className="crow" title={c.last_error ?? undefined}>
+            <div key={name} className={`crow ${bad ? "cerr" : ""}`} title={c.last_error ?? `last ok ${c.last_ok_at ?? "never"}`}>
               <span className="cn">{name}</span>
-              <span className="cs">{c.items_fetched} items</span>
+              <span className="cs">{c.items_fetched} items · {fresh}</span>
               <span className={`cs ${bad ? "cstate-err" : "cstate-ok"}`}>
                 {bad ? "ERROR" : c.last_ok_at ? "OK" : "—"}
               </span>
+              {bad && <span className="cerrmsg">{c.last_error}</span>}
             </div>
           );
         })}
@@ -316,6 +324,9 @@ export function CollectorHealth({ overview }: { overview: Overview | null }) {
           facts, intelligence score, observations, and history.
           Scores are <em>intelligence priority</em> — they guide attention and
           are not validated risk estimates. Facts come from BMKG open feeds.
+        </p>
+        <p style={{ fontSize: 11, color: "var(--faint)", lineHeight: 1.6 }}>
+          UPD {overview.last_update ? fmtWIB(overview.last_update) : "—"} WIB · auto-refresh 60s
         </p>
       </div>
     </div>
