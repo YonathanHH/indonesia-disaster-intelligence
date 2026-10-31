@@ -60,41 +60,51 @@ BMKG CAP nowcast RSS+XML (severe weather)  ──► collectors/ ──► inges
 │   └── .env.example
 ├── frontend/           # Next.js + MapLibre dashboard
 │   ├── app/ components/ lib/
+│   ├── instrumentation.ts        # starts FastAPI when `next dev` boots
+│   ├── scripts/dev-backend.mjs   # backend launcher (auto-uses backend/.venv)
 │   ├── Dockerfile
 │   └── .env.example
 ├── docker-compose.yml
+├── package.json        # root shortcuts: `npm run dev` / `npm run dev:docker`
+├── scripts/setup.mjs   # `npm run setup`: venv + backend/frontend deps
 └── .github/workflows/ci.yml
 ```
 
 ## Prerequisites
 
-- Python 3.12+, Node 20+, Docker (optional, for prod-like PostGIS stack)
+- Node 20+, Python 3.12+ (Docker only needed for the optional `dev:docker` PostGIS stack)
 
-## Quickstart (local, no Docker)
+## Quickstart (no Docker)
 
-Backend:
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python -m app.ingest_cli --once      # live ingest from BMKG (~30 events)
-uvicorn app.main:app --reload --port 8000
+npm run setup   # creates backend/.venv + installs Python and frontend deps
+cp backend/.env.example backend/.env          # first time only
+cp frontend/.env.example frontend/.env.local  # first time only
+
+npm run dev  # Next dev on :3000; it starts FastAPI on :8000 automatically
 ```
 
-Frontend:
+`npm run setup` is idempotent: it reuses `backend/.venv` and only installs
+missing packages. `python -m app.ingest_cli --once` is optional — the API also
+ingests in the background on startup.
+
+You only need one command. `npm run dev` (from the repo root or `frontend/`)
+starts Next.js, which launches the API, waits for it to be ready, and proxies
+`/api/v1/*` to it. Open **http://localhost:3000** — the API is never a separate
+terminal. Use `npm run dev:backend` if you want the API on its own.
+
+Docker alternative (prod-like, with PostGIS):
+
 ```bash
-cd frontend
-npm install
-cp .env.example .env.local   # point NEXT_PUBLIC_API_URL at the backend
-npm run dev                  # http://localhost:3000 (use `npm run dev -- -p 3100` if 3000 is taken)
+npm run dev:docker  # postgis :5432, backend :8000, frontend :3000
+npm run dev:down    # stop the stack
 ```
 
 The map defaults to the public MapLibre demo globe style so it works with zero
 API keys; set a production vector-tile URL (e.g. in `components/Map.tsx`) before
 any public deployment.
 
-Verify: `curl localhost:8000/api/v1/status`, open the map, click an event.
+Verify: open http://localhost:3000 and click an event. `curl localhost:3000/api/v1/status` should return the same payload as `curl localhost:8000/api/v1/status`.
 
 ## Configuration
 
@@ -114,16 +124,22 @@ Frontend (`frontend/.env.local`, see `frontend/.env.example`):
 
 | Var | Default | Notes |
 |-----|---------|-------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend base URL |
+| `NEXT_PUBLIC_API_URL` | empty | Empty = same-origin `/api/v1/*`, proxied by Next to FastAPI. Set only to call the backend directly. |
+| `BACKEND_INTERNAL_URL` | `http://127.0.0.1:8000` | Where Next proxies API requests. Compose sets `http://backend:8000`. |
+| `BACKEND_PORT` | `8000` | Port the auto-started backend listens on (local dev). |
+| `DEV_BACKEND` | unset | Set `0` to stop `next dev` from auto-starting the API. |
 
 Never commit `.env` / `.env.local` — they are gitignored. CI uses examples/defaults only.
 
 ## Docker (prod-like, with PostGIS)
 
 ```bash
-docker compose up --build
+npm run dev:docker   # or: docker compose up --build
 # frontend :3000, backend :8000, postgis :5432
 ```
+
+The browser still uses only http://localhost:3000; Next proxies `/api/v1/*`
+to the `backend` service over the compose network.
 
 ## API
 
@@ -166,7 +182,7 @@ Toggleable in the map toolbar (backend-driven via `GET /api/v1/overlays`):
 
 ```bash
 cd backend && python -m pytest -q
-cd ../frontend && npm run typecheck && npm run build
+npm run typecheck && npm run build   # frontend shortcuts from repo root
 ```
 
 CI (`.github/workflows/ci.yml`) runs the same on push/PR.

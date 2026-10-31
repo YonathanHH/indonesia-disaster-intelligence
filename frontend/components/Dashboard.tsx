@@ -164,33 +164,30 @@ export default function Dashboard() {
       .finally(() => setDetailLoading(false));
   }, [selectedId]);
 
-  const priority = useMemo(() => {
-    const now = Date.now();
-    const dayAgo = now - 24 * 60 * 60 * 1000;
-    let arr = [...events];
+  // status-strip KPI filter — shared by the map and the priority list
+  const visibleEvents = useMemo(() => {
+    if (!kpi) return events;
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
     switch (kpi) {
       case "active":
-        arr = arr.filter((e) => e.status === "active");
-        break;
+        return events.filter((e) => e.status === "active");
       case "high":
-        arr = arr.filter((e) => e.priority === "HIGH" || e.priority === "CRITICAL");
-        break;
+        return events.filter((e) => e.priority === "HIGH" || e.priority === "CRITICAL");
       case "quakes24h":
-        arr = arr.filter(
+        return events.filter(
           (e) =>
             (e.type === "earthquake" || e.type === "tsunami_alert") &&
             +new Date(e.occurred_at) >= dayAgo
         );
-        break;
       case "weather":
-        arr = arr.filter((e) => e.type === "severe_weather" && e.status === "active");
-        break;
+        return events.filter((e) => e.type === "severe_weather" && e.status === "active");
       case "tsunami":
-        arr = arr.filter((e) => e.type === "tsunami_alert" && e.status === "active");
-        break;
-      default:
-        break;
+        return events.filter((e) => e.type === "tsunami_alert" && e.status === "active");
     }
+  }, [events, kpi]);
+
+  const priority = useMemo(() => {
+    const arr = [...visibleEvents];
     switch (sortMode) {
       case "newest":
         arr.sort((a, b) => +new Date(b.occurred_at) - +new Date(a.occurred_at));
@@ -211,7 +208,7 @@ export default function Dashboard() {
         break;
     }
     return arr.slice(0, 30);
-  }, [events, sortMode, kpi]);
+  }, [visibleEvents, sortMode]);
 
   const faultsOff = layers.find((l) => l.id === "faults" && !l.available);
   const rightOpen = !!selectedId || detailLoading;
@@ -252,7 +249,7 @@ export default function Dashboard() {
         {/* left rail: priority + feed */}
         <div className="rail">
           <EventList
-            events={events}
+            events={visibleEvents}
             filtered={priority}
             loading={loading}
             selectedId={selectedId}
@@ -328,11 +325,11 @@ export default function Dashboard() {
                 ⛔ Faults unavailable
               </span>
             )}
-            <span className="plotcount">{events.length} plotted</span>
+            <span className="plotcount">{visibleEvents.length} plotted</span>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
             <Map
-              events={events}
+              events={visibleEvents}
               selectedId={selectedId}
               hoverId={hoverId}
               onSelect={setSelectedId}

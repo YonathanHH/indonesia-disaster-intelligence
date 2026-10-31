@@ -1,4 +1,6 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Empty by default: requests go to the same origin and Next proxies /api/v1/*
+// to FastAPI (see next.config.mjs). Set NEXT_PUBLIC_API_URL only to bypass it.
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 async function get<T>(path: string): Promise<T> {
   const r = await fetch(`${BASE}${path}`, { cache: "no-store" });

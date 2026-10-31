@@ -1,0 +1,19 @@
+{
+  "name": "bmkgintel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BMKG Intelligence — unified dev orchestrator (backend + frontend)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "node frontend/scripts/dev-backend.mjs",
+    "dev:docker": "docker compose up --build",
+    "dev:down": "docker compose down",
+    "setup": "node scripts/setup.mjs",
+    "build": "npm --prefix frontend run build",
+    "typecheck": "npm --prefix frontend run typecheck"
+  }
+}

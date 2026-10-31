@@ -34,7 +34,7 @@ export default function StatusStrip({
           key={it.key}
           className={`stat ${kpi === it.key ? "on" : ""}`}
           onClick={() => onToggle(it.key)}
-          title={`Filter priority list: ${HINTS[it.key]} — click again to clear`}
+          title={`Filter map & priority list: ${HINTS[it.key]} — click again to clear`}
           aria-pressed={kpi === it.key}
         >
           <span className={`v ${it.v === 0 ? "zero" : ""}`}>{it.v}</span>
