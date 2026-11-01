@@ -1,7 +1,8 @@
 "use client";
+import type { CSSProperties } from "react";
 import type { EventDetail, Overview } from "../lib/types";
-import { Badge, EmptyState, SkeletonRows } from "./ui";
-import { fmtClock, fmtRel, fmtWIB, prioColor, typeLabel } from "../lib/format";
+import { fmtClock, fmtRel, fmtWIB, prioColor, prioLabel, typeLabel } from "../lib/format";
+import { EmptyState, SkeletonRows } from "./ui";
 
 /** Human labels for score components (quake-v1 / weather-v1). */
 const COMP_LABEL: Record<string, string> = {
@@ -33,11 +34,7 @@ function ScoreBreakdown({ bd }: { bd: Record<string, unknown> | null }) {
   const maxAbs = Math.max(...entries.map(([, v]) => Math.abs(v as number)), 0.01);
   return (
     <div>
-      {method && (
-        <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--faint)", marginBottom: 8 }}>
-          METHOD {String(method).toUpperCase()}
-        </div>
-      )}
+      {method && <div className="note" style={{ marginBottom: 8 }}>Method {String(method)}</div>}
       {entries.map(([k, v]) => {
         const n = v as number;
         const pct = Math.min(100, (Math.abs(n) / maxAbs) * 100);
@@ -49,14 +46,11 @@ function ScoreBreakdown({ bd }: { bd: Record<string, unknown> | null }) {
                 className="cfill"
                 style={{
                   width: `${pct}%`,
-                  background: n < 0 ? "var(--crit)" : "var(--accent)",
-                  left: 0,
+                  background: n < 0 ? "var(--crit)" : undefined,
                 }}
               />
             </span>
-            <span className="cv" style={{ color: n < 0 ? "var(--crit)" : undefined }}>
-              {n > 0 ? `+${n}` : `${n}`}
-            </span>
+            <span className={`cv ${n < 0 ? "neg" : ""}`}>{n > 0 ? `+${n}` : `${n}`}</span>
           </div>
         );
       })}
@@ -65,22 +59,24 @@ function ScoreBreakdown({ bd }: { bd: Record<string, unknown> | null }) {
 }
 
 function Observations({ obs }: { obs: EventDetail["observations"] }) {
-  if (obs.length === 0) return <p style={{ fontSize: 12, color: "var(--faint)" }}>No linked observations.</p>;
+  if (obs.length === 0) return <p className="note" style={{ margin: 0 }}>No linked observations.</p>;
   return (
     <div>
       {obs.map((o) => (
         <div key={o.id} className="obsrow">
           <div className="head">
-            <span className="chip">{o.source}</span>
-            <span className="chip">{o.kind}</span>
-            <span className="mono" style={{ fontSize: 10, color: "var(--faint)" }}>{fmtClock(o.observed_at)}</span>
+            <span>{o.source}</span>
+            <span>{o.kind}</span>
+            <span className="mono" style={{ marginLeft: "auto" }}>{fmtClock(o.observed_at)}</span>
           </div>
-          <div style={{ marginTop: 2 }}>{o.text}</div>
-          <div style={{ marginTop: 3, fontSize: 11 }}>
+          <div className="text">{o.text}</div>
+          <div className="links">
             {o.url && (
-              <a href={o.url} target="_blank" rel="noreferrer">source link</a>
+              <a href={o.url} target="_blank" rel="noreferrer">
+                Source link
+              </a>
             )}
-            {o.author && <span style={{ color: "var(--faint)" }}> · {o.author}</span>}
+            {o.author && <span style={{ color: "var(--muted)" }}> · {o.author}</span>}
           </div>
         </div>
       ))}
@@ -88,184 +84,266 @@ function Observations({ obs }: { obs: EventDetail["observations"] }) {
   );
 }
 
-export default function EventDetail({
+export default function EventDetailPanel({
   detail,
   loading,
   onResolve,
+  onClose,
   resolving,
 }: {
   detail: EventDetail | null;
   loading: boolean;
   onResolve: (id: string) => void;
+  onClose: () => void;
   resolving: boolean;
 }) {
   if (loading && !detail) {
     return (
       <div className="panel" style={{ height: "100%" }}>
-        <div className="panelhead"><span className="title">Event detail</span></div>
-        <div className="panelbody"><SkeletonRows n={6} h={36} /></div>
+        <div className="panelhead">
+          <span className="title">Event detail</span>
+          <span className="grow" />
+          <button className="btn btn-quiet" onClick={onClose}>Close</button>
+        </div>
+        <div className="panelbody"><SkeletonRows n={6} h={38} /></div>
       </div>
     );
   }
-  if (!detail) return null;
+
+  if (!detail) {
+    return (
+      <div className="panel" style={{ height: "100%" }}>
+        <div className="panelhead">
+          <span className="title">Event detail</span>
+          <span className="grow" />
+          <button className="btn btn-quiet" onClick={onClose}>Close</button>
+        </div>
+        <EmptyState
+          title="Event unavailable"
+          sub="The event could not be loaded. It may have been removed from the feed."
+          action={<button className="btn" onClick={onClose}>Back to list</button>}
+        />
+      </div>
+    );
+  }
+
   const c = prioColor(detail.priority);
   return (
-    <div className="panel" style={{ height: "100%" }}>
+    <div className="panel" style={{ height: "100%", "--sev": c } as CSSProperties}>
       <div className="panelhead">
         <span className="title">Event detail</span>
         <span className="grow" />
         {detail.status === "active" ? (
           <button className="btn" onClick={() => onResolve(detail.id)} disabled={resolving}>
-            {resolving ? "Resolving…" : "✓ Resolve"}
+            {resolving ? "Resolving…" : "Resolve event"}
           </button>
         ) : (
-          <span className="chip">RESOLVED</span>
+          <span className="note">Resolved</span>
         )}
+        <button className="btn btn-quiet" onClick={onClose} title="Close detail">
+          Close
+        </button>
       </div>
 
       <div className="detailbody">
         <div className="dt-head">
-          <Badge prio={detail.priority} />
-          <span className="chip">{typeLabel(detail.type)}</span>
-          <span className="mono" style={{ fontSize: 10, color: "var(--faint)" }}>
-            {detail.source_count} source{detail.source_count === 1 ? "" : "s"}
+          <span className="dt-sev" style={{ color: c }}>
+            <span className="sevdot" style={{ background: c }} />
+            {prioLabel(detail.priority)}
           </span>
+          <span>{typeLabel(detail.type)}</span>
+          <span>{detail.source_count} source{detail.source_count === 1 ? "" : "s"}</span>
         </div>
         <h2 className="dt-title">{detail.title}</h2>
 
-        <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em", color: "var(--faint)", marginTop: 12 }}>
-          INTELLIGENCE PRIORITY <span style={{ fontWeight: 400, letterSpacing: 0 }}>· guides attention, not a risk estimate</span>
-        </div>
-        <div className="scorebar" style={{ marginTop: 5 }} aria-label={`Intelligence priority score ${detail.score.toFixed(1)} of 10`}>
-          <span className="track">
-            <span className="fill" style={{ width: `${detail.score * 10}%`, background: c }} />
-          </span>
-          <span className="val">{detail.score.toFixed(1)}/10</span>
+        <div className="facts">
+          <div className="fact">
+            <dt>Occurred</dt>
+            <dd>{fmtWIB(detail.occurred_at)}</dd>
+          </div>
+          <div className="fact">
+            <dt>Location</dt>
+            <dd>{detail.latitude.toFixed(3)}, {detail.longitude.toFixed(3)}</dd>
+          </div>
+          {detail.magnitude != null && (
+            <div className="fact">
+              <dt>Magnitude</dt>
+              <dd>M{detail.magnitude.toFixed(1)}</dd>
+            </div>
+          )}
+          {detail.depth_km != null && (
+            <div className="fact">
+              <dt>Depth</dt>
+              <dd>{detail.depth_km} km</dd>
+            </div>
+          )}
+          {detail.expires_at && (
+            <div className="fact">
+              <dt>Expires</dt>
+              <dd>{fmtWIB(detail.expires_at)}</dd>
+            </div>
+          )}
         </div>
 
-        <dl className="kv">
-          <dt>Time (WIB)</dt><dd>{fmtWIB(detail.occurred_at)}</dd>
-          <dt>Location</dt><dd>{detail.latitude.toFixed(3)}, {detail.longitude.toFixed(3)}</dd>
-          {detail.magnitude != null && (<><dt>Magnitude</dt><dd>M{detail.magnitude.toFixed(1)}</dd></>)}
-          {detail.depth_km != null && (<><dt>Depth</dt><dd>{detail.depth_km} km</dd></>)}
-          {detail.expires_at && (<><dt>Expires</dt><dd>{fmtWIB(detail.expires_at)}</dd></>)}
-        </dl>
+        <div className="score-block">
+          <div className="score-head">
+            <span className="score-label">Intelligence priority</span>
+            <span className="score-value">
+              {detail.score.toFixed(1)}
+              <span> / 10</span>
+            </span>
+          </div>
+          <div className="score-track">
+            <div className="score-fill" style={{ width: `${detail.score * 10}%` }} />
+          </div>
+          <div className="score-note">Guides attention; not a risk estimate.</div>
+        </div>
 
         {detail.ai_assessment && (
           <>
-            <div className="sect">Intelligence assessment</div>
-            <div className="assess">{detail.ai_assessment}</div>
-            <div style={{ fontSize: 10, color: "var(--faint)", marginTop: -2, marginBottom: 8 }}>
-              Interpretive — not BMKG-verified. Facts above.
+            <div className="sect">
+              <span>Assessment</span>
+              <span className="note">Interpretive</span>
             </div>
+            <div className="assess">{detail.ai_assessment}</div>
+            <p className="note" style={{ marginTop: 6 }}>
+              Not BMKG-verified. Facts above come from the source feed.
+            </p>
           </>
         )}
 
-        <div className="sect">Score breakdown</div>
+        <div className="sect">
+          <span>Score breakdown</span>
+          <span className="note">points of 10</span>
+        </div>
         <ScoreBreakdown bd={detail.score_breakdown} />
 
         {detail.cluster && (
           <>
-            <div className="sect">Sequence · {detail.cluster.cluster_id}</div>
-            <div style={{ fontSize: 12, color: "var(--dim)", lineHeight: 1.55 }}>
-              Part of a {detail.cluster.member_count}-event sequence
-              (mainshock M{detail.cluster.mainshock_magnitude}).
-              Related events are developing as one situation, not isolated incidents.
-              <div style={{ marginTop: 4, fontSize: 11, color: "var(--faint)" }}>
-                System-derived cluster (sequence-v1) — see briefing watchlist for the full chain.
-              </div>
+            <div className="sect">
+              <span>Sequence</span>
+              <span className="note">{detail.cluster.cluster_id}</span>
             </div>
+            <p className="prose" style={{ margin: 0 }}>
+              Part of a {detail.cluster.member_count}-event sequence around a
+              M{detail.cluster.mainshock_magnitude} mainshock. Related events are
+              developing as one situation, not isolated incidents.
+            </p>
+            <p className="note" style={{ marginTop: 4 }}>
+              System-derived cluster (sequence-v1). The briefing shows the full chain.
+            </p>
           </>
         )}
 
         {detail.exposure && (
           <>
             <div className="sect">
-              Exposure · {detail.exposure.class}{" "}
-              <span className="note">heuristic, {detail.exposure.confidence} confidence</span>
+              <span>Exposure</span>
+              <span className="note">
+                {detail.exposure.class} · {detail.exposure.confidence} confidence
+              </span>
             </div>
-            <div style={{ fontSize: 12, color: "var(--dim)", lineHeight: 1.55 }}>
-              {detail.exposure.coastal_threat && (
-                <div style={{ marginBottom: 4 }}>
-                  <span className="badge b-CRITICAL">COASTAL THREAT</span>{" "}
-                  BMKG tsunami bulletin active — treat nearby coasts as exposed until cleared.
-                </div>
-              )}
-              {detail.exposure.nearest_cities.length > 0 ? (
-                <div>
-                  Nearest cities (epicentral):{" "}
-                  {detail.exposure.nearest_cities.slice(0, 3).map((nc, i) => (
-                    <span key={nc.city}>
-                      {i > 0 && " · "}{nc.city} ~{nc.km} km
-                    </span>
-                  ))}
-                  {detail.exposure.felt_areas > 0 && ` · felt in ${detail.exposure.felt_areas} area(s)`}
-                </div>
-              ) : (
-                <div>
-                  No major city within 150 km of the epicenter
-                  {detail.exposure.felt_areas > 0 && ` · felt in ${detail.exposure.felt_areas} area(s)`}.
-                </div>
-              )}
-              {detail.exposure.assets.slice(0, 2).map((a) => (
-                <div key={a} style={{ marginTop: 4, fontSize: 11.5 }}>{a}</div>
-              ))}
-              <div style={{ marginTop: 4, fontSize: 10.5, color: "var(--faint)" }}>
-                Heuristic overlay, not a loss estimate. Distances are epicentral, not shaking footprints.
-              </div>
-            </div>
+            {detail.exposure.coastal_threat && (
+              <p className="prose" style={{ marginTop: 0 }}>
+                <span className="sevword" style={{ color: "var(--crit)" }}>
+                  <span className="sevdot" style={{ background: "var(--crit)" }} />
+                  Coastal threat
+                </span>{" "}
+                BMKG tsunami bulletin active. Treat nearby coasts as exposed until cleared.
+              </p>
+            )}
+            {detail.exposure.nearest_cities.length > 0 ? (
+              <ul className="mini">
+                {detail.exposure.nearest_cities.slice(0, 3).map((nc) => (
+                  <li key={nc.city}>
+                    <span>{nc.city}, {nc.province}</span>
+                    <span className="mono">{nc.km} km</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="prose" style={{ margin: 0 }}>
+                No major city within 150 km of the epicentre.
+              </p>
+            )}
+            {detail.exposure.felt_areas > 0 && (
+              <p className="note" style={{ marginTop: 6 }}>
+                Felt in {detail.exposure.felt_areas} area{detail.exposure.felt_areas === 1 ? "" : "s"}.
+              </p>
+            )}
+            {detail.exposure.assets.slice(0, 2).map((a) => (
+              <p key={a} className="prose" style={{ marginTop: 6, marginBottom: 0 }}>{a}</p>
+            ))}
+            <p className="note" style={{ marginTop: 6 }}>
+              Heuristic overlay, not a loss estimate. Distances are epicentral.
+            </p>
           </>
         )}
 
         {detail.history_context && (
           <>
             <div className="sect">
-              Historical context · {detail.history_context.class}{" "}
-              <span className="note">vs {detail.history_context.observed.baseline_days}d regional BMKG record</span>
+              <span>Regional history</span>
+              <span className="note">{detail.history_context.class}</span>
             </div>
-            <div style={{ fontSize: 12, color: "var(--dim)", lineHeight: 1.55 }}>
-              {detail.history_context.observed.recent_count} regional event(s) in the last{" "}
-              {detail.history_context.observed.recent_days} days vs ~
-              {detail.history_context.observed.expected_7d} expected
+            <p className="prose" style={{ margin: 0 }}>
+              {detail.history_context.observed.recent_count} regional event
+              {detail.history_context.observed.recent_count === 1 ? "" : "s"} in the last{" "}
+              {detail.history_context.observed.recent_days} days, against about{" "}
+              {detail.history_context.observed.expected_7d} expected over the{" "}
+              {detail.history_context.observed.baseline_days}-day BMKG record.
               {detail.history_context.observed.largest_in_days != null &&
-                ` · largest M in ${detail.history_context.observed.largest_in_days}d+ of record`}{" "}
-              ({detail.history_context.confidence} confidence).
-              <div style={{ marginTop: 4, fontSize: 10.5, color: "var(--faint)" }}>
-                Observed counts from recorded history; the class is system interpretation, not a forecast.
-              </div>
-            </div>
+                ` Largest magnitude in ${detail.history_context.observed.largest_in_days}+ days.`}
+            </p>
+            <p className="note" style={{ marginTop: 4 }}>
+              Observed counts from recorded history; the class is interpretation, not a forecast.
+            </p>
           </>
         )}
 
-        {detail.situations && detail.situations.length > 0 && (
+        {detail.situations.length > 0 && (
           <>
             <div className="sect">
-              Situations · {detail.situations.length}{" "}
-              <span className="note">connected hazards, co-occurrence only</span>
+              <span>Situations</span>
+              <span className="note">co-occurrence, not causality</span>
             </div>
-            {detail.situations.map((s) => (
-              <div key={s.situation_id} style={{ marginBottom: 8, fontSize: 12, lineHeight: 1.55 }}>
-                <span className={`urg ${s.severity === "CRITICAL" ? "u-immediate" : s.severity === "HIGH" ? "u-soon" : "u-routine"}`}>
-                  {s.severity}
-                </span>{" "}
-                <span style={{ fontWeight: 600 }}>{s.title}</span>
-                <div style={{ color: "var(--dim)", marginTop: 2 }}>{s.interpretation}</div>
-                <div style={{ fontSize: 10.5, color: "var(--faint)", marginTop: 2 }}>
-                  {s.kind} · {s.member_ids.length} linked · {s.confidence} confidence
+            {detail.situations.map((s) => {
+              const sc =
+                s.severity === "CRITICAL" ? "var(--crit)" : s.severity === "HIGH" ? "var(--high)" : "var(--muted)";
+              return (
+                <div key={s.situation_id} className="sitrow">
+                  <div className="sit-head">
+                    <span className="sevword" style={{ color: sc }}>
+                      <span className="sevdot" style={{ background: sc }} />
+                      {prioLabel(s.severity)}
+                    </span>
+                    <span className="sit-title">{s.title}</span>
+                  </div>
+                  <div className="sit-text">{s.interpretation}</div>
+                  <div className="sit-meta">
+                    {s.kind.replace(/_/g, " ")} · {s.member_ids.length} linked · {s.confidence} confidence
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
 
-        <div className="sect">Observations · {detail.observations.length}</div>
+        <div className="sect">
+          <span>Observations</span>
+          <span className="note">{detail.observations.length}</span>
+        </div>
         <Observations obs={detail.observations} />
 
-        <div className="sect">History</div>
+        <div className="sect">
+          <span>Event log</span>
+          <span className="note">oldest first</span>
+        </div>
+        {detail.history.length === 0 && <p className="note" style={{ margin: 0 }}>No recorded changes.</p>}
         {detail.history.map((h, i) => (
           <div key={i} className={`histrow h-${h.kind}`}>
             <span className="hdot" />
-            <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ minWidth: 0 }}>
               <span className="hkind">{h.kind.replace(/_/g, " ")}</span>
               <span className="hmsg">{h.message}</span>
             </span>
@@ -274,10 +352,8 @@ export default function EventDetail({
         ))}
 
         {detail.extra && (
-          <details style={{ marginTop: 12 }}>
-            <summary style={{ fontSize: 10, color: "var(--faint)", textTransform: "uppercase", letterSpacing: "0.08em", cursor: "pointer" }}>
-              Provenance / raw
-            </summary>
+          <details>
+            <summary>Raw provenance</summary>
             <pre className="raw">{JSON.stringify(detail.extra, null, 2).slice(0, 3000)}</pre>
           </details>
         )}
@@ -286,49 +362,36 @@ export default function EventDetail({
   );
 }
 
-/** Default right-panel content when nothing is selected: collector health. */
-export function CollectorHealth({ overview }: { overview: Overview | null }) {
+/** Compact feed health for the footer, kept out of the working canvas. */
+export function FeedsBar({ overview }: { overview: Overview | null }) {
   if (!overview) return null;
   const rows = Object.entries(overview.collectors);
-  const okCount = rows.filter(([, c]) => !c.last_error && c.last_ok_at).length;
   return (
-    <div className="panel" style={{ height: "100%" }}>
-      <div className="panelhead">
-        <span className="title">System status</span>
-        <span className="count">{okCount}/{rows.length} OK</span>
-      </div>
-      <div className="detailbody">
-        <div className="sect" style={{ marginTop: 0 }}>
-          Collectors <span className="note">muted by design — errors surface here only</span>
-        </div>
-        {rows.length === 0 && (
-          <EmptyState title="No ingest runs yet" sub="Press ↻ Ingest to run the collectors." />
-        )}
-        {rows.map(([name, c]) => {
-          const bad = !!c.last_error;
-          const fresh = c.last_ok_at ? fmtRel(c.last_ok_at) : "never";
-          return (
-            <div key={name} className={`crow ${bad ? "cerr" : ""}`} title={c.last_error ?? `last ok ${c.last_ok_at ?? "never"}`}>
-              <span className="cn">{name}</span>
-              <span className="cs">{c.items_fetched} items · {fresh}</span>
-              <span className={`cs ${bad ? "cstate-err" : "cstate-ok"}`}>
-                {bad ? "ERROR" : c.last_ok_at ? "OK" : "—"}
-              </span>
-              {bad && <span className="cerrmsg">{c.last_error}</span>}
-            </div>
-          );
-        })}
-        <div className="sect">How to read this console</div>
-        <p style={{ fontSize: 12, color: "var(--dim)", lineHeight: 1.6 }}>
-          Select an event in the list, on the map, or in the feed to inspect its
-          facts, intelligence score, observations, and history.
-          Scores are <em>intelligence priority</em> — they guide attention and
-          are not validated risk estimates. Facts come from BMKG open feeds.
-        </p>
-        <p style={{ fontSize: 11, color: "var(--faint)", lineHeight: 1.6 }}>
-          UPD {overview.last_update ? fmtWIB(overview.last_update) : "—"} WIB · auto-refresh 60s
-        </p>
-      </div>
-    </div>
+    <footer className="feedsbar" aria-label="Data feed health">
+      <span className="feeds-label">Feeds</span>
+      {rows.map(([name, c]) => {
+        const bad = !!c.last_error;
+        const fresh = c.last_ok_at ? fmtRel(c.last_ok_at) : "never";
+        return (
+          <span
+            key={name}
+            className={`feedstate ${bad ? "err" : ""}`}
+            title={
+              bad
+                ? `${name}: ${c.last_error}`
+                : `${name}: last ok ${c.last_ok_at ?? "never"}`
+            }
+          >
+            <span className="dot" />
+            <span className="fname">{name}</span>
+            <span className="fmeta">{c.items_fetched} items · {fresh}</span>
+            {bad && <span className="ferr">{c.last_error}</span>}
+          </span>
+        );
+      })}
+      <span className="feeds-right">
+        Updated {fmtWIB(overview.last_update)} WIB · refreshes every 60 s · BMKG open data
+      </span>
+    </footer>
   );
 }

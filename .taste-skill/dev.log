@@ -1,0 +1,101 @@
+
+> bmkgintel@1.0.0 dev
+> npm --prefix frontend run dev
+
+
+> bmkgintel-web@1.0.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3001
+  - Environments: .env.local
+  - Experiments (use with caution):
+    · instrumentationHook
+
+ ✓ Starting...
+ ✓ Compiled /instrumentation in 390ms (22 modules)
+[dev] reusing backend at http://127.0.0.1:8000
+ ✓ Ready in 2.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 3.4s (488 modules)
+ GET / 200 in 3730ms
+ GET / 200 in 69ms
+(node:3428) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET / 200 in 53ms
+ GET / 200 in 47ms
+ ✓ Compiled in 368ms (474 modules)
+ ✓ Compiled in 161ms (474 modules)
+ ✓ Compiled in 200ms (474 modules)
+ ✓ Compiled in 166ms (474 modules)
+ ✓ Compiled in 249ms (474 modules)
+ ✓ Compiled in 163ms (474 modules)
+ ✓ Compiled in 169ms (474 modules)
+ ✓ Compiled in 203ms (474 modules)
+ ✓ Compiled in 571ms (474 modules)
+ ✓ Compiled in 164ms (474 modules)
+ ✓ Compiled in 245ms (474 modules)
+ ✓ Compiled in 176ms (474 modules)
+ ✓ Compiled in 218ms (474 modules)
+ ✓ Compiled in 177ms (474 modules)
+ ✓ Compiled in 248ms (474 modules)
+ ✓ Compiled in 246ms (474 modules)
+ ✓ Compiled in 169ms (474 modules)
+ ✓ Compiled in 159ms (474 modules)
+ ✓ Compiled in 182ms (474 modules)
+ ✓ Compiled in 377ms (488 modules)
+ ✓ Compiled in 249ms (488 modules)
+ ✓ Compiled in 186ms (488 modules)
+ ✓ Compiled in 216ms (488 modules)
+ ✓ Compiled in 236ms (488 modules)
+ ✓ Compiled in 242ms (488 modules)
+ ✓ Compiled in 593ms (474 modules)
+ GET / 200 in 176ms
+ GET / 200 in 69ms
+ GET / 200 in 55ms
+ GET / 200 in 63ms
+ GET / 200 in 49ms
+ GET / 200 in 54ms
+ ✓ Compiled in 464ms (488 modules)
+ ✓ Compiled in 244ms (474 modules)
+ ✓ Compiled in 385ms (488 modules)
+ GET / 200 in 317ms
+ GET / 200 in 48ms
+ GET / 200 in 86ms
+ GET / 200 in 66ms
+ GET / 200 in 50ms
+ ✓ Compiled in 507ms (474 modules)
+ ✓ Compiled in 280ms (474 modules)
+ ✓ Compiled in 378ms (474 modules)
+ GET / 200 in 283ms
+ GET / 200 in 54ms
+ GET / 200 in 62ms
+ GET / 200 in 54ms
+ GET / 200 in 85ms
+ GET / 200 in 63ms
+ GET / 200 in 53ms
+ ✓ Compiled in 341ms (488 modules)
+ GET / 200 in 298ms
+ GET / 200 in 62ms
+ GET / 200 in 46ms
+ GET / 200 in 40ms
+ GET / 200 in 59ms
+ GET / 200 in 68ms
+ GET / 200 in 61ms
+ GET / 200 in 87ms
+ GET / 200 in 61ms
+ GET / 200 in 56ms
+ GET / 200 in 97ms
+ GET / 200 in 68ms
+ GET / 200 in 37ms
+ GET / 200 in 41ms
+ GET / 200 in 52ms
+ GET / 200 in 52ms
+ ✓ Compiled in 418ms (488 modules)
+ GET / 200 in 226ms
+ GET / 200 in 45ms
+ GET / 200 in 76ms
+ GET / 200 in 61ms
+ GET / 200 in 48ms
+[?25h

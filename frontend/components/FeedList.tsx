@@ -4,8 +4,8 @@ import { EmptyState, SectionHead, TypeMark } from "./ui";
 import { fmtRel, typeLabel } from "../lib/format";
 
 const KIND_LABEL: Record<string, string> = {
-  new_event: "NEW EVENT",
-  observation: "OBS",
+  new_event: "Detected",
+  observation: "Observed",
 };
 
 export default function FeedList({
@@ -17,43 +17,60 @@ export default function FeedList({
   eventsById: Map<string, BMKGEvent>;
   onSelect: (id: string) => void;
 }) {
+  // the API emits the same observation more than once; keep the first of each
+  const seen = new Set<string>();
+  const items = feed.filter((f) => {
+    const k = `${f.ts}|${f.kind}|${f.event_id ?? ""}|${f.title}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
   return (
-    <section className="panel" style={{ flex: "1" }} aria-label="Event feed">
-      <SectionHead title="Event feed" count={feed.length} note="chronological" />
+    <section className="panel" style={{ flex: "0 0 150px" }} aria-label="Recent activity">
+      <SectionHead title="Recent activity" count={items.length} note="newest first" />
       <div className="panelbody">
-        {feed.length === 0 && (
-          <EmptyState title="No recent activity" sub="Run Ingest to pull the latest BMKG feeds." />
+        {items.length === 0 && (
+          <EmptyState title="No recent activity" sub="Run Ingest to pull the latest BMKG observations." />
         )}
-        {feed.map((f, i) => {
+        {items.map((f, i) => {
           const key = `${f.ts}-${f.event_id ?? f.title}-${i}`;
           const clickable = !!f.event_id;
           const linked = (f.event_id && eventsById.get(f.event_id)) || null;
           const body = (
             <>
-              <span className="bar" />
-              <span style={{ minWidth: 0 }}>
-                <span className="head">
-                  <span className="kind">{KIND_LABEL[f.kind] ?? f.kind.toUpperCase()}</span>
-                  {linked && (
-                    <span className="ftype">
-                      <TypeMark type={linked.type} size={7} />
-                      {typeLabel(linked.type)}
-                      {linked.magnitude != null && ` M${linked.magnitude.toFixed(1)}`}
-                    </span>
-                  )}
-                  <span className="time" title={f.ts}>{fmtRel(f.ts)}</span>
-                </span>
-                <span className="t" style={{ display: "block" }}>{f.title || "—"}</span>
-                {f.detail && <span className="src" style={{ display: "block" }}>{f.detail}</span>}
+              <span className="feed-kind">
+                <span className="sevdot" />
+                {KIND_LABEL[f.kind] ?? f.kind.replace(/_/g, " ")}
+              </span>
+              <span className="feed-title">
+                {linked && <TypeMark type={linked.type} size={7} />}
+                {f.title || "Untitled item"}
+              </span>
+              <span className="feed-time" title={f.ts}>
+                {fmtRel(f.ts)}
               </span>
             </>
           );
+          const tip = [
+            KIND_LABEL[f.kind] ?? f.kind.replace(/_/g, " "),
+            f.title,
+            linked ? typeLabel(linked.type) : null,
+            linked?.magnitude != null ? `M${linked.magnitude.toFixed(1)}` : null,
+            f.detail,
+          ]
+            .filter(Boolean)
+            .join(" · ");
           return clickable ? (
-            <button key={key} className={`feedrow fk-${f.kind}`} onClick={() => onSelect(f.event_id!)}>
+            <button
+              key={key}
+              className={`feedrow fk-${f.kind}`}
+              onClick={() => onSelect(f.event_id!)}
+              title={tip}
+            >
               {body}
             </button>
           ) : (
-            <div key={key} className={`feedrow fk-${f.kind}`} role="listitem">
+            <div key={key} className={`feedrow fk-${f.kind}`} role="listitem" title={tip}>
               {body}
             </div>
           );

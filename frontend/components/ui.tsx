@@ -1,13 +1,8 @@
 /** Small shared presentational primitives. */
 import type { ReactNode } from "react";
 
-/** Severity badge — short uppercase label on tinted fill. */
-export function Badge({ prio }: { prio: string }) {
-  return <span className={`badge b-${prio}`}>{prio}</span>;
-}
-
 /** Type shape glyph: circle = earthquake, diamond = severe weather,
- *  double-ring = tsunami, triangle = volcano. Never color-only. */
+ *  ring = tsunami, triangle = volcano. Never colour-only. */
 export function TypeMark({ type, size = 8 }: { type: string; size?: number }) {
   const cls =
     type === "severe_weather" ? "tg tg-wx" :
@@ -31,7 +26,7 @@ export function SectionHead({
     <div className="panelhead">
       <span className="title">{title}</span>
       {count != null && <span className="count">{count}</span>}
-      {note && <span className="sect note" style={{ margin: 0 }}>{note}</span>}
+      {note && <span className="note">{note}</span>}
       <span className="grow" />
       {children && <div className="tools">{children}</div>}
     </div>
@@ -40,7 +35,11 @@ export function SectionHead({
 
 export function SkeletonRows({ n = 5, h = 44 }: { n?: number; h?: number }) {
   return (
-    <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }} aria-busy="true" aria-label="Loading">
+    <div
+      style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}
+      aria-busy="true"
+      aria-label="Loading"
+    >
       {Array.from({ length: n }).map((_, i) => (
         <div key={i} className="skel" style={{ height: h }} />
       ))}

@@ -16,6 +16,12 @@ export const api = {
   overlays: () => get<import("./types").OverlayLayer[]>("/api/v1/overlays"),
   overlayGeojson: (id: string) => get<{ type: string; features: unknown[] }>(`/api/v1/overlays/${id}`),
   briefing: () => get<import("./types").Briefing>("/api/v1/briefing"),
+  escalation: () => get<import("./types").Escalation>("/api/v1/escalation"),
+  changes: (hours: number) =>
+    get<import("./types").Developments>(`/api/v1/changes?since_hours=${hours.toFixed(2)}`),
+  clusters: () => get<import("./types").ClusterSequence[]>("/api/v1/clusters"),
+  analytics: (refresh = false) =>
+    get<import("./types").Analytics>(`/api/v1/analytics?refresh=${refresh ? "true" : "false"}`),
   ingest: () =>
     fetch(`${BASE}/api/v1/ingest/run`, { method: "POST" }).then((r) => r.json()),
   resolve: (id: string) =>

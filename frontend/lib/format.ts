@@ -1,20 +1,26 @@
 /** Shared formatting + display constants (single source of truth). */
 
 export const PRIO_COLOR: Record<string, string> = {
-  LOW: "#2dd4a7",
-  MODERATE: "#f5c518",
-  HIGH: "#ff9349",
-  CRITICAL: "#ff5d5d",
+  LOW: "#4fae8d",
+  MODERATE: "#d9a441",
+  HIGH: "#e8824f",
+  CRITICAL: "#e5566f",
 };
 
 export const TYPE_LABEL: Record<string, string> = {
-  earthquake: "EARTHQUAKE",
-  severe_weather: "SEVERE WX",
-  tsunami_alert: "TSUNAMI",
+  earthquake: "Earthquake",
+  severe_weather: "Severe weather",
+  tsunami_alert: "Tsunami",
+  volcano: "Volcano",
 };
 
 export function prioColor(p: string): string {
-  return PRIO_COLOR[p] ?? "#8fa1b5";
+  return PRIO_COLOR[p] ?? "#909298";
+}
+
+/** Sentence-case severity for labels ("CRITICAL" -> "Critical"). */
+export function prioLabel(p: string): string {
+  return p.charAt(0) + p.slice(1).toLowerCase();
 }
 
 /** Absolute time, Asia/Jakarta (WIB). */
@@ -64,5 +70,5 @@ export function fmtRel(s: string | null | undefined): string {
 }
 
 export function typeLabel(t: string): string {
-  return TYPE_LABEL[t] ?? t.toUpperCase();
+  return TYPE_LABEL[t] ?? t.replace(/_/g, " ");
 }

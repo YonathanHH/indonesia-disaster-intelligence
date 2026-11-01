@@ -128,6 +128,18 @@ export type Escalation = {
   posture: string;
 };
 
+export type Analytics = {
+  generated_at: string;
+  total_events: number;
+  by_type: Record<string, number>;
+  by_priority: Record<string, number>;
+  quakes_24h: number;
+  avg_magnitude_7d: number | null;
+  daily_counts_14d: { day: string; count: number }[];
+  observations: number;
+  top_regions: { region: string; count: number }[];
+};
+
 export type WatchItem = {
   event_id: string;
   title: string;
@@ -187,6 +199,12 @@ export type Sequence = {
   centroid: number[];
   history: HistoryContext | null;
   situation_ids: string[];
+};
+
+/** Full cluster payload from /clusters (adds member ids for map links). */
+export type ClusterSequence = Sequence & {
+  method: string;
+  member_ids: string[];
 };
 
 export type HistoryContext = {

@@ -1,0 +1,1470 @@
+{
+ "url": "http://localhost:3001",
+ "at": "2026-10-31T09:04:39.953Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    1
+   ],
+   "motion": {
+    "elements": 7,
+    "css": 6,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 900,
+     "screens": 1,
+     "words": 85,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 0,
+     "sections": 2,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 0.9,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 12,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.61,
+       "mono": false
+      },
+      {
+       "family": "ui-monospace",
+       "share": 0.3,
+       "mono": false
+      },
+      {
+       "family": "Helvetica Neue",
+       "share": 0.09,
+       "mono": false
+      }
+     ],
+     "familyCount": 3,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 13,
+      "vw": 0.9,
+      "font": "Inter",
+      "text": "BMKG INTELLIGENCE"
+     },
+     "monoShare": 0.3,
+     "monoProseShare": 0.3,
+     "monoFamilies": [
+      "ui-monospace"
+     ],
+     "monoSamples": [
+      "UPD — WIB",
+      "0/0",
+      "0",
+      "0 plotted",
+      "300 km",
+      "LOW"
+     ],
+     "microLabels": 9,
+     "microLabelShare": 0.334,
+     "microSamples": [
+      "BMKG INTELLIGENCE",
+      "INDONESIA ENVIRONMENTAL INTELLIGENCE",
+      "SYNC",
+      "Priority intelligence",
+      "Event feed",
+      "chronological"
+     ],
+     "upperShare": 0.43,
+     "centerShare": 0.2,
+     "smallText": 12
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#06090d",
+     "bodyBgHsl": {
+      "h": 214,
+      "s": 0.37,
+      "l": 0.04
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0a0f16",
+       "top": 44,
+       "hsl": {
+        "h": 215,
+        "s": 0.38,
+        "l": 0.06
+       }
+      },
+      {
+       "color": "#0a0e13",
+       "top": 85,
+       "hsl": {
+        "h": 213,
+        "s": 0.31,
+        "l": 0.06
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#5f7085",
+       "share": 0.48
+      },
+      {
+       "color": "#93a4b8",
+       "share": 0.37
+      },
+      {
+       "color": "#dfe7f1",
+       "share": 0.09
+      },
+      {
+       "color": "#000000",
+       "share": 0.04
+      },
+      {
+       "color": "#f5c518",
+       "share": 0.01
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "INDONESIA ENVIRONMENTAL INTELLIGENCE",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "UPD — WIB",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10.5,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "DATA: BMKG · data.bmkg.go.id",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "chronological",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Run Ingest to pull the latest BMKG feeds",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Layers",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 7,
+     "hairlineSamples": [
+      "header.topbar 1440px",
+      "div.rail 340px",
+      "div.panelhead 339px",
+      "section.panel 339px",
+      "div.panelhead 339px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 1,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 0.47
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 44,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 900,
+    "margins": {
+     "left": 12,
+     "right": 25
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [],
+    "edgeText": [
+     {
+      "text": "BMKG INTELLIGENCE",
+      "side": "left",
+      "px": 14
+     },
+     {
+      "text": "Priority intelligence",
+      "side": "left",
+      "px": 12
+     },
+     {
+      "text": "Event feed",
+      "side": "left",
+      "px": 12
+     }
+    ],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 11,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.22,
+    "voidBox": {
+     "x": 1080,
+     "y": 120,
+     "w": 360,
+     "h": 780
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": true,
+    "ground": "#06090d",
+    "sidebar": null,
+    "topbar": {
+     "h": 44
+    },
+    "canvas": {
+     "left": 12,
+     "right": 14
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 0.9,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 12,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 276,
+       "at": 624,
+       "panel": "PRIORITY INTELLIGENCE"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 4,
+     "radii": [
+      [
+       0,
+       3
+      ],
+      [
+       4,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 1
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.94,
+     "tiny": 15,
+     "tinySamples": [
+      "INDONESIA ENVIRONMENTAL  10px",
+      "SYNC 10px",
+      "DATA: BMKG · data.bmkg.g 10px",
+      "Priority intelligence 10px"
+     ],
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ]
+    },
+    "title": null,
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 7,
+    "css": 6,
+    "transitions": 0,
+    "scripted": 1,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1205,
+     "screens": 1.2,
+     "words": 75,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 0,
+     "sections": 2,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 1.7,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 12,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.55,
+       "mono": false
+      },
+      {
+       "family": "ui-monospace",
+       "share": 0.34,
+       "mono": false
+      },
+      {
+       "family": "Helvetica Neue",
+       "share": 0.11,
+       "mono": false
+      }
+     ],
+     "familyCount": 3,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 13,
+      "vw": 1.7,
+      "font": "Inter",
+      "text": "BMKG INTELLIGENCE"
+     },
+     "monoShare": 0.34,
+     "monoProseShare": 0.34,
+     "monoFamilies": [
+      "ui-monospace"
+     ],
+     "monoSamples": [
+      "0/0",
+      "0",
+      "0 plotted",
+      "300 km",
+      "LOW",
+      "MODERATE"
+     ],
+     "microLabels": 8,
+     "microLabelShare": 0.296,
+     "microSamples": [
+      "BMKG INTELLIGENCE",
+      "SYNC",
+      "Priority intelligence",
+      "Event feed",
+      "chronological",
+      "Layers"
+     ],
+     "upperShare": 0.39,
+     "centerShare": 0.25,
+     "smallText": 10
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#06090d",
+     "bodyBgHsl": {
+      "h": 214,
+      "s": 0.37,
+      "l": 0.04
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0a0f16",
+       "top": 43,
+       "hsl": {
+        "h": 215,
+        "s": 0.38,
+        "l": 0.06
+       }
+      },
+      {
+       "color": "#0a0e13",
+       "top": 640,
+       "hsl": {
+        "h": 213,
+        "s": 0.31,
+        "l": 0.06
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#93a4b8",
+       "share": 0.46
+      },
+      {
+       "color": "#5f7085",
+       "share": 0.36
+      },
+      {
+       "color": "#dfe7f1",
+       "share": 0.11
+      },
+      {
+       "color": "#000000",
+       "share": 0.05
+      },
+      {
+       "color": "#f5c518",
+       "share": 0.01
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "chronological",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Run Ingest to pull the latest BMKG feeds",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Layers",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "0 plotted",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10.5,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 8,
+     "hairlineSamples": [
+      "header.topbar 768px",
+      "div.rail 768px",
+      "div.panelhead 768px",
+      "section.panel 768px",
+      "div.panelhead 768px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 1,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 0.38
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 43,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1205,
+    "margins": {
+     "left": 12,
+     "right": 11
+    },
+    "sections": [
+     {
+      "sel": "div.rail",
+      "tag": "div",
+      "top": 43,
+      "height": 556,
+      "words": 17,
+      "media": 0,
+      "middle": 77,
+      "heading": null,
+      "left": 12,
+      "right": 285,
+      "textLeft": 12,
+      "textRight": 285,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.rail",
+      "tag": "div",
+      "top": 599,
+      "height": 605,
+      "words": 29,
+      "media": 1,
+      "middle": 47,
+      "heading": null,
+      "left": 12,
+      "right": 11,
+      "textLeft": 22,
+      "textRight": 12,
+      "fullBleed": true,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [
+     {
+      "top": 72,
+      "height": 388
+     }
+    ],
+    "h1s": [],
+    "edgeText": [
+     {
+      "text": "BMKG INTELLIGENCE",
+      "side": "left",
+      "px": 14
+     },
+     {
+      "text": "Priority intelligence",
+      "side": "left",
+      "px": 12
+     },
+     {
+      "text": "Event feed",
+      "side": "left",
+      "px": 12
+     },
+     {
+      "text": "plotted",
+      "side": "right",
+      "px": 12
+     }
+    ],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 11,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#06090d",
+    "sidebar": null,
+    "topbar": {
+     "h": 43
+    },
+    "canvas": {
+     "left": 0,
+     "right": 0
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 1.7,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 12,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 1,
+     "radii": [
+      [
+       4,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 1
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.93,
+     "tiny": 13,
+     "tinySamples": [
+      "SYNC 10px",
+      "Priority intelligence 10px",
+      "0/0 10px",
+      "SCORE 10px"
+     ],
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ]
+    },
+    "title": null,
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 77,
+    "css": 6,
+    "transitions": 0,
+    "scripted": 71,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 1178,
+     "screens": 1.4,
+     "words": 75,
+     "img": 0,
+     "video": 0,
+     "canvas": 1,
+     "svg": 0,
+     "sections": 2,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 3.3,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": null,
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Inter",
+       "share": 0.55,
+       "mono": false
+      },
+      {
+       "family": "ui-monospace",
+       "share": 0.34,
+       "mono": false
+      },
+      {
+       "family": "Helvetica Neue",
+       "share": 0.11,
+       "mono": false
+      }
+     ],
+     "familyCount": 3,
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ],
+     "sizeCount": 5,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 13,
+      "vw": 3.3,
+      "font": "Inter",
+      "text": "BMKG INTELLIGENCE"
+     },
+     "monoShare": 0.34,
+     "monoProseShare": 0.34,
+     "monoFamilies": [
+      "ui-monospace"
+     ],
+     "monoSamples": [
+      "0/0",
+      "0",
+      "0 plotted",
+      "300 km",
+      "LOW",
+      "MODERATE"
+     ],
+     "microLabels": 8,
+     "microLabelShare": 0.296,
+     "microSamples": [
+      "BMKG INTELLIGENCE",
+      "SYNC",
+      "Priority intelligence",
+      "Event feed",
+      "chronological",
+      "Layers"
+     ],
+     "upperShare": 0.39,
+     "centerShare": 0.25,
+     "smallText": 10
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#06090d",
+     "bodyBgHsl": {
+      "h": 214,
+      "s": 0.37,
+      "l": 0.04
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#0a0f16",
+       "top": 81,
+       "hsl": {
+        "h": 215,
+        "s": 0.38,
+        "l": 0.06
+       }
+      },
+      {
+       "color": "#0a0e13",
+       "top": 712,
+       "hsl": {
+        "h": 213,
+        "s": 0.31,
+        "l": 0.06
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#93a4b8",
+       "share": 0.46
+      },
+      {
+       "color": "#5f7085",
+       "share": 0.36
+      },
+      {
+       "color": "#dfe7f1",
+       "share": 0.11
+      },
+      {
+       "color": "#000000",
+       "share": 0.05
+      },
+      {
+       "color": "#f5c518",
+       "share": 0.01
+      }
+     ],
+     "button": null,
+     "lowContrast": [
+      {
+       "text": "chronological",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Run Ingest to pull the latest BMKG feeds",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 11,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "Layers",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      },
+      {
+       "text": "0 plotted",
+       "ratio": 3.8,
+       "need": 4.5,
+       "size": 10.5,
+       "fg": "#5f7085",
+       "bg": "#0a0f16"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 8,
+     "hairlineSamples": [
+      "header.topbar 390px",
+      "div.rail 390px",
+      "div.panelhead 390px",
+      "section.panel 390px",
+      "div.panelhead 390px"
+     ],
+     "outlinedBoxes": 1,
+     "dashed": 0,
+     "blurred": 1,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 1,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "canvas",
+      "ratio": 0.16
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 81,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 1178,
+    "margins": {
+     "left": 12,
+     "right": 11
+    },
+    "sections": [
+     {
+      "sel": "div.rail",
+      "tag": "div",
+      "top": 81,
+      "height": 556,
+      "words": 17,
+      "media": 0,
+      "middle": 0,
+      "heading": null,
+      "left": 12,
+      "right": 96,
+      "textLeft": 12,
+      "textRight": 96,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.rail",
+      "tag": "div",
+      "top": 637,
+      "height": 540,
+      "words": 29,
+      "media": 1,
+      "middle": 0,
+      "heading": null,
+      "left": 12,
+      "right": 11,
+      "textLeft": 22,
+      "textRight": 12,
+      "fullBleed": true,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [
+     {
+      "top": 112,
+      "height": 388
+     }
+    ],
+    "h1s": [],
+    "edgeText": [
+     {
+      "text": "BMKG INTELLIGENCE",
+      "side": "left",
+      "px": 14
+     },
+     {
+      "text": "Priority intelligence",
+      "side": "left",
+      "px": 12
+     },
+     {
+      "text": "Event feed",
+      "side": "left",
+      "px": 12
+     },
+     {
+      "text": "plotted",
+      "side": "right",
+      "px": 12
+     }
+    ],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 11,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#06090d",
+    "sidebar": null,
+    "topbar": {
+     "h": 81
+    },
+    "canvas": {
+     "left": 0,
+     "right": 0
+    },
+    "hero": {
+     "text": "BMKG INTELLIGENCE",
+     "words": 2,
+     "chars": 17,
+     "lines": 1,
+     "size": 13,
+     "vw": 3.3,
+     "font": "Inter",
+     "weight": 800,
+     "tracking": 0.1,
+     "leading": 1.45,
+     "top": 10,
+     "tag": "span",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 0,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 1,
+     "radii": [
+      [
+       4,
+       1
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 1
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.93,
+     "tiny": 13,
+     "tinySamples": [
+      "SYNC 10px",
+      "Priority intelligence 10px",
+      "0/0 10px",
+      "SCORE 10px"
+     ],
+     "sizes": [
+      9,
+      10,
+      11,
+      12,
+      13
+     ]
+    },
+    "title": null,
+    "colourShare": 0.001
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "FAIL",
+   "id": "micro-label",
+   "width": 1440,
+   "message": "9 tiny uppercase letter-spaced labels (e.g. \"BMKG INTELLIGENCE\", \"INDONESIA ENVIRONMENTAL INTELLIGENCE\", \"SYNC\", \"Priority intelligence\").",
+   "fix": "Use sentence-case text at a readable size, or delete the label.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Low-contrast text: \"INDONESIA ENVIRONMENTAL INTELLIGENCE\" 3.8:1 needs 4.5:1; \"UPD — WIB\" 3.8:1 needs 4.5:1; \"DATA: BMKG · data.bmkg.go.id\" 3.8:1 needs 4.5:1; \"chronological\" 3.8:1 needs 4.5:1",
+   "fix": "Darken or lighten the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "font-count",
+   "width": 1440,
+   "message": "3 typefaces in use (Inter, ui-monospace, Helvetica Neue).",
+   "fix": "Two at most.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "edge-text",
+   "width": 1440,
+   "message": "3 text block(s) sit within 16px of the screen edge: \"BMKG INTELLIGENCE\" (14px from the left); \"Priority intelligence\" (12px from the left); \"Event feed\" (12px from the left)",
+   "fix": "Keep text inside the page margin (16–32px or more). Only display type deliberately bled past the edge may touch it.",
+   "alsoAt": [
+    768
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "tiny-text",
+   "width": 1440,
+   "message": "15 text blocks under 11px: INDONESIA ENVIRONMENTAL  10px, SYNC 10px, DATA: BMKG · data.bmkg.g 10px, Priority intelligence 10px.",
+   "fix": "Nothing below 11px; secondary text 12px, data 13–14px.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "panel-void",
+   "width": 1440,
+   "message": "1 card(s) hold a blank band inside: 276px in \"PRIORITY INTELLIGENCE\".",
+   "fix": "A card stretches to its neighbour only when it has content to fill. Keep a legend or a note directly under its chart (only an action or a total may sit at a stretched card's foot), let a short card keep its own height (align-items: start), and let a filtered block shrink to its rows."
+  },
+  {
+   "level": "FAIL",
+   "id": "no-title",
+   "width": 1440,
+   "message": "The screen has no h1.",
+   "fix": "Name the screen in an h1 at the top of the canvas (18–28px): \"Overview\", \"Payouts\", the project's name.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "blank-gap",
+   "width": 390,
+   "message": "A 388px stretch at 112px holds nothing.",
+   "fix": "Check that it is a deliberate rest (once per page at most); otherwise close it to the normal section gap."
+  },
+  {
+   "level": "WARN",
+   "id": "edge-text",
+   "width": 390,
+   "message": "4 text block(s) sit 12–15px from the phone's edge: \"BMKG INTELLIGENCE\" (14px); \"Priority intelligence\" (12px); \"Event feed\" (12px)",
+   "fix": "The page margin is 16–20px on a phone; the header and the corner labels sit on it too."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\yonat\\Documents\\Personal_Project\\bmkgintel\\.taste-skill\\before\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

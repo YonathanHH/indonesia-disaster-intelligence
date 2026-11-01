@@ -5,10 +5,23 @@ import TopBar from "../components/TopBar";
 import StatusStrip, { type KpiKey } from "../components/StatusStrip";
 import EventList, { type SortMode } from "../components/EventList";
 import FeedList from "../components/FeedList";
-import EventDetail, { CollectorHealth } from "../components/EventDetail";
+import EventDetail, { FeedsBar } from "../components/EventDetail";
 import BriefingPanel from "../components/BriefingPanel";
 import { api } from "../lib/api";
-import type { BMKGEvent, Briefing, EventDetail as EventDetailT, FeedItem, OverlayLayer, Overview, VolcanoFeature } from "../lib/types";
+import { fmtClock } from "../lib/format";
+import type {
+  Analytics,
+  BMKGEvent,
+  Briefing,
+  ClusterSequence,
+  Developments,
+  Escalation,
+  EventDetail as EventDetailT,
+  FeedItem,
+  OverlayLayer,
+  Overview,
+  VolcanoFeature,
+} from "../lib/types";
 
 export default function Dashboard() {
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -33,12 +46,21 @@ export default function Dashboard() {
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [briefingLoading, setBriefingLoading] = useState(false);
   const [briefingErr, setBriefingErr] = useState<string | null>(null);
+  const [escalation, setEscalation] = useState<Escalation | null>(null);
+  const [changes, setChanges] = useState<Developments | null>(null);
+  const [changesSince, setChangesSince] = useState<number | null>(null);
+  const [changesDismissed, setChangesDismissed] = useState(false);
+  const [clusters, setClusters] = useState<ClusterSequence[]>([]);
+  const [showSequences, setShowSequences] = useState(true);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
   const [kpi, setKpi] = useState<KpiKey | null>(null);
   const [ingesting, setIngesting] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const changesSinceRef = useRef<number | null>(null);
+  const analyticsLoadRef = useRef<Promise<void> | null>(null);
 
   const toggleKpi = useCallback(
     (key: KpiKey) => setKpi((prev) => (prev === key ? null : key)),
@@ -60,8 +82,8 @@ export default function Dashboard() {
   }, [q]);
 
   // auto-dismiss operator toast
-  const flash = useCallback((msg: string) => {
-    setMsg(msg);
+  const flash = useCallback((text: string) => {
+    setMsg(text);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setMsg(null), 12000);
   }, []);
@@ -70,12 +92,75 @@ export default function Dashboard() {
     setBriefingLoading(true);
     setBriefingErr(null);
     try {
-      setBriefing(await api.briefing());
+      const b = await api.briefing();
+      setBriefing(b);
+      if (b.escalation) setEscalation(b.escalation);
     } catch (e) {
       setBriefing(null);
-      setBriefingErr(e instanceof Error ? e.message : "Briefing unavailable — is the backend running?");
+      setBriefingErr(e instanceof Error ? e.message : "Briefing unavailable. Is the backend running?");
     } finally {
       setBriefingLoading(false);
+    }
+  }, []);
+
+  const openBriefing = useCallback(() => {
+    setBriefingOpen(true);
+    loadBriefing();
+  }, [loadBriefing]);
+
+  const loadEscalation = useCallback(async () => {
+    try {
+      setEscalation(await api.escalation());
+    } catch {
+      /* keep the last known posture */
+    }
+  }, []);
+
+  const loadClusters = useCallback(async () => {
+    try {
+      setClusters(await api.clusters());
+    } catch {
+      /* the sequence layer simply stays empty */
+    }
+  }, []);
+
+  // One analytics request at a time per page: concurrent readers of the DuckDB
+  // sidecar can collide, and a failed read must not immediately trigger a
+  // refresh while another tab may already be rewriting the snapshot.
+  const loadAnalytics = useCallback(async (refresh = false) => {
+    if (analyticsLoadRef.current) {
+      if (!refresh) return analyticsLoadRef.current;
+      await analyticsLoadRef.current;
+    }
+    const run = async () => {
+      try {
+        let a = await api.analytics(refresh);
+        if (!refresh && a.daily_counts_14d.length === 0) {
+          await new Promise((r) => setTimeout(r, 1200));
+          a = await api.analytics(false);
+          if (a.daily_counts_14d.length === 0) a = await api.analytics(true);
+        }
+        setAnalytics(a);
+      } catch {
+        /* the sparkline stays hidden */
+      }
+    };
+    const p = run();
+    analyticsLoadRef.current = p;
+    try {
+      await p;
+    } finally {
+      if (analyticsLoadRef.current === p) analyticsLoadRef.current = null;
+    }
+  }, []);
+
+  const loadChanges = useCallback(async () => {
+    const since = changesSinceRef.current;
+    if (!since) return;
+    try {
+      setChanges(await api.changes((Date.now() - since) / 3_600_000));
+    } catch {
+      setChanges(null);
     }
   }, []);
 
@@ -92,7 +177,7 @@ export default function Dashboard() {
       if (qDeb) params.push(`&q=${encodeURIComponent(qDeb)}`);
       setEvents(await api.events(params.join("")));
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "API unreachable — is the backend running on :8000?");
+      setErr(e instanceof Error ? e.message : "API unreachable. Is the backend running on :8000?");
     } finally {
       setLoading(false);
     }
@@ -103,12 +188,16 @@ export default function Dashboard() {
     try {
       await api.ingest();
       await load();
+      loadEscalation();
+      loadClusters();
+      loadAnalytics(true);
+      loadChanges();
     } catch {
-      setErr("Ingest failed — is the backend running on :8000?");
+      setErr("Ingest failed. Is the backend running on :8000?");
     } finally {
       setIngesting(false);
     }
-  }, [load]);
+  }, [load, loadEscalation, loadClusters, loadAnalytics, loadChanges]);
 
   const resolveEvent = useCallback(
     async (id: string) => {
@@ -118,7 +207,7 @@ export default function Dashboard() {
         setDetail(await api.detail(id));
         load();
       } catch {
-        flash("⚠ Resolve failed — is the backend running?");
+        flash("Resolve failed. Is the backend running?");
       } finally {
         setResolving(false);
       }
@@ -131,6 +220,37 @@ export default function Dashboard() {
     const t = setInterval(load, 60000);
     return () => clearInterval(t);
   }, [load]);
+
+  // posture, sequences and the since-last-visit delta change on a slower cadence
+  // than the event list; analytics is refreshed once and after each ingest.
+  useEffect(() => {
+    loadEscalation();
+    loadClusters();
+    loadAnalytics();
+    const t = setInterval(() => {
+      loadEscalation();
+      loadClusters();
+      loadChanges();
+    }, 300000);
+    return () => clearInterval(t);
+  }, [loadEscalation, loadClusters, loadAnalytics, loadChanges]);
+
+  useEffect(() => {
+    const KEY = "bmkgintel.last-visit";
+    let previous = 0;
+    try {
+      const raw = localStorage.getItem(KEY);
+      previous = raw ? Number(raw) : 0;
+      localStorage.setItem(KEY, String(Date.now()));
+    } catch {
+      return;
+    }
+    const hours = previous ? (Date.now() - previous) / 3_600_000 : 0;
+    if (!Number.isFinite(hours) || hours < 0.1 || hours > 72) return;
+    changesSinceRef.current = previous;
+    setChangesSince(previous);
+    loadChanges();
+  }, [loadChanges]);
 
   useEffect(() => {
     api.overlays().then(setLayers).catch(() => setLayers([]));
@@ -207,30 +327,74 @@ export default function Dashboard() {
         arr.sort((a, b) => b.score - a.score || +new Date(b.occurred_at) - +new Date(a.occurred_at));
         break;
     }
-    return arr.slice(0, 30);
+    return arr;
   }, [visibleEvents, sortMode]);
 
+  const topEvent = useMemo(
+    () =>
+      visibleEvents.reduce<BMKGEvent | null>(
+        (best, e) => (!best || e.score > best.score ? e : best),
+        null
+      ),
+    [visibleEvents]
+  );
+
   const faultsOff = layers.find((l) => l.id === "faults" && !l.available);
+  const volcanoLayer = layers.find((l) => l.id === "volcanoes");
   const rightOpen = !!selectedId || detailLoading;
   const eventsById = useMemo(() => new globalThis.Map(events.map((e) => [e.id, e] as [string, BMKGEvent])), [events]);
+  const hasFilters = !!kpi || !!typeF || !!prioF || !!qDeb;
+
+  const growingIds = useMemo(
+    () => changes?.growing_sequences.map((g) => g.cluster_id) ?? [],
+    [changes]
+  );
+
+  // only sequences whose mainshock and at least one member survive the current
+  // filters are drawn, so the layer always explains what is actually plotted
+  const visibleSequences = useMemo(() => {
+    if (!showSequences) return [];
+    const byId = new globalThis.Map(visibleEvents.map((e) => [e.id, e] as [string, BMKGEvent]));
+    return clusters
+      .filter(
+        (c) =>
+          byId.has(c.mainshock_id) &&
+          c.member_ids.some((id) => id !== c.mainshock_id && byId.has(id))
+      )
+      .sort((a, b) => +new Date(b.latest_at) - +new Date(a.latest_at))
+      .slice(0, 6);
+  }, [clusters, visibleEvents, showSequences]);
+
+  const deltaItems = changes
+    ? [
+        { n: changes.counts.new ?? 0, label: "new" },
+        { n: changes.counts.escalated ?? 0, label: "escalated" },
+        { n: changes.counts.de_escalated ?? 0, label: "de-escalated" },
+        { n: changes.counts.resolved ?? 0, label: "resolved" },
+        { n: changes.counts.expired ?? 0, label: "expired" },
+        {
+          n: changes.counts.growing_sequences ?? 0,
+          label: changes.counts.growing_sequences === 1 ? "sequence growing" : "sequences growing",
+        },
+      ].filter((it) => it.n > 0)
+    : [];
 
   return (
     <div className="app">
       <TopBar
         overview={overview}
+        escalation={escalation}
         loading={loading || ingesting}
         err={err}
         onIngest={runIngest}
-        onBriefing={() => {
-          setBriefingOpen(true);
-          loadBriefing();
-        }}
+        onBriefing={openBriefing}
+        onPosture={openBriefing}
       />
 
       {err && (
         <div className="errbanner" role="alert">
           <span className="grow">
-            {err} Start backend: <span className="mono">uvicorn app.main:app</span> then press ↻ Ingest.
+            {err} Start the backend with <code>uvicorn app.main:app</code>, then press Ingest.
           </span>
           <button className="btn" onClick={load}>Retry</button>
         </div>
@@ -239,23 +403,66 @@ export default function Dashboard() {
       {msg && (
         <div className="toast" role="status">
           <span className="grow">{msg}</span>
-          <button className="btn btn-ghost" onClick={() => setMsg(null)} aria-label="Dismiss">✕</button>
+          <button className="btn btn-quiet" onClick={() => setMsg(null)} aria-label="Dismiss message">
+            Dismiss
+          </button>
         </div>
       )}
 
-      {overview && <StatusStrip overview={overview} kpi={kpi} onToggle={toggleKpi} />}
+      {overview && (
+        <StatusStrip
+          overview={overview}
+          kpi={kpi}
+          onToggle={toggleKpi}
+          topEvent={topEvent}
+          onSelectTop={setSelectedId}
+          filteredCount={visibleEvents.length}
+          analytics={analytics}
+        />
+      )}
 
-      <div className="layout">
-        {/* left rail: priority + feed */}
-        <div className="rail">
+      {changes && changesSince && !changesDismissed && deltaItems.length > 0 && (
+        <div className="deltabanner" role="status">
+          <span className="delta-label">
+            Since <span className="mono">{fmtClock(new Date(changesSince).toISOString())}</span>
+          </span>
+          <span className="delta-items">
+            {deltaItems.map((it) => (
+              <span className="delta-item" key={it.label}>
+                <span className="n">{it.n}</span>
+                {it.label}
+              </span>
+            ))}
+          </span>
+          <span className="delta-actions">
+            <button className="btn" onClick={openBriefing}>
+              Open briefing
+            </button>
+            <button className="btn btn-quiet" onClick={() => setChangesDismissed(true)}>
+              Dismiss
+            </button>
+          </span>
+        </div>
+      )}
+
+      <div className={`layout ${rightOpen ? "with-detail" : ""}`}>
+        {/* left rail: priority + activity */}
+        <div className="rail rail-left">
           <EventList
-            events={visibleEvents}
+            events={events}
             filtered={priority}
             loading={loading}
             selectedId={selectedId}
             hoverId={hoverId}
             sortMode={sortMode}
+            typeF={typeF}
+            prioF={prioF}
+            query={q}
+            hasFilters={hasFilters}
             onSort={setSortMode}
+            onType={setTypeF}
+            onPriority={setPrioF}
+            onQuery={setQ}
             onSelect={setSelectedId}
             onHover={setHoverId}
             onClearFilters={clearFilters}
@@ -263,109 +470,83 @@ export default function Dashboard() {
           <FeedList feed={feed} eventsById={eventsById} onSelect={(id) => setSelectedId(id)} />
         </div>
 
-        {/* center: map surface */}
-        <div className="rail" style={{ borderRight: "none", overflow: "hidden" }}>
-          <div className="maptoolbar" role="toolbar" aria-label="Map filters and layers">
-            <label style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <span className="sr-only">Type</span>
-              <select value={typeF} onChange={(e) => setTypeF(e.target.value)} aria-label="Filter by type">
-                <option value="">ALL TYPES</option>
-                <option value="earthquake">EARTHQUAKE</option>
-                <option value="severe_weather">SEVERE WX</option>
-                <option value="tsunami_alert">TSUNAMI</option>
-              </select>
-            </label>
-            <label style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              <span className="sr-only">Priority</span>
-              <select value={prioF} onChange={(e) => setPrioF(e.target.value)} aria-label="Filter by priority">
-                <option value="">ALL PRIORITIES</option>
-                <option>CRITICAL</option>
-                <option>HIGH</option>
-                <option>MODERATE</option>
-                <option>LOW</option>
-              </select>
-            </label>
-            <input
-              placeholder="Search — e.g. Cilacap"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              aria-label="Search events"
-              style={{ width: 180 }}
-            />
-            {kpi && (
-              <button className="btn" onClick={() => setKpi(null)} title="Clear status-strip filter">
-                ✕ {kpi.toUpperCase()}
-              </button>
-            )}
-            <span className="label" style={{ marginLeft: 4 }}>Layers</span>
-            {layers
-              .filter((l) => l.id === "volcanoes" || l.id === "plates")
-              .map((l) => (
-                <label
-                  key={l.id}
-                  className="layerchk"
-                  title={l.available ? l.attribution : (l.reason ?? l.attribution)}
-                  style={{ opacity: l.available ? 1 : 0.45 }}
-                >
-                  <input
-                    type="checkbox"
-                    disabled={!l.available}
-                    checked={l.id === "volcanoes" ? showVolcanoes : showPlates}
-                    onChange={(e) =>
-                      l.id === "volcanoes"
-                        ? setShowVolcanoes(e.target.checked)
-                        : setShowPlates(e.target.checked)
-                    }
-                  />
-                  {l.id === "volcanoes" ? `Volc${l.count != null ? ` ${l.count}` : ""}` : `Plates`}
-                </label>
-              ))}
-            {faultsOff && (
-              <span className="label" title={faultsOff.reason ?? ""} style={{ opacity: 0.6 }}>
-                ⛔ Faults unavailable
-              </span>
-            )}
-            <span className="plotcount">{visibleEvents.length} plotted</span>
+        {/* center: the watch map */}
+        <div className="mapcol">
+          <div className="maphead" role="toolbar" aria-label="Map layers">
+            <span className="map-title">
+              Indonesia watch
+              <span className="count">{visibleEvents.length} plotted</span>
+            </span>
+            <div className="map-layers">
+              <label
+                className="layerchk"
+                title="Connect earthquake sequences to their mainshock"
+              >
+                <input
+                  type="checkbox"
+                  checked={showSequences}
+                  onChange={(e) => setShowSequences(e.target.checked)}
+                />
+                Sequences
+                {showSequences && visibleSequences.length > 0 ? ` · ${visibleSequences.length}` : ""}
+              </label>
+              <label
+                className="layerchk"
+                title={volcanoLayer?.attribution ?? "PVMBG volcano levels"}
+              >
+                <input
+                  type="checkbox"
+                  checked={showVolcanoes}
+                  onChange={(e) => setShowVolcanoes(e.target.checked)}
+                />
+                Volcanoes{volcanoLayer?.count != null ? ` · ${volcanoLayer.count}` : ""}
+              </label>
+              <label className="layerchk" title="PB2002 tectonic plate boundaries">
+                <input
+                  type="checkbox"
+                  checked={showPlates}
+                  onChange={(e) => setShowPlates(e.target.checked)}
+                />
+                Plates
+              </label>
+              {faultsOff && (
+                <span className="layer-note" title={faultsOff.reason ?? ""}>
+                  Faults unavailable
+                </span>
+              )}
+            </div>
           </div>
-          <div style={{ flex: 1, minHeight: 0 }}>
-            <Map
-              events={visibleEvents}
-              selectedId={selectedId}
-              hoverId={hoverId}
-              onSelect={setSelectedId}
-              onHover={setHoverId}
-              volcanoes={volcanoes}
-              showVolcanoes={showVolcanoes}
-              plates={plates}
-              showPlates={showPlates}
-            />
-          </div>
+          <Map
+            events={visibleEvents}
+            selectedId={selectedId}
+            hoverId={hoverId}
+            onSelect={setSelectedId}
+            onHover={setHoverId}
+            volcanoes={volcanoes}
+            showVolcanoes={showVolcanoes}
+            plates={plates}
+            showPlates={showPlates}
+            sequences={visibleSequences}
+            showSequences={showSequences}
+            growingIds={growingIds}
+          />
         </div>
 
-        {/* right rail: detail / system status */}
-        <div className={`rail rail-right ${rightOpen ? "open" : ""}`}>
-          {rightOpen ? (
-            <>
-              <EventDetail
-                detail={detail}
-                loading={detailLoading}
-                onResolve={resolveEvent}
-                resolving={resolving}
-              />
-              <button
-                className="btn"
-                onClick={() => setSelectedId(null)}
-                style={{ margin: 12 }}
-                title="Close detail (back to system status)"
-              >
-                ← Back to system status
-              </button>
-            </>
-          ) : (
-            <CollectorHealth overview={overview} />
-          )}
-        </div>
+        {/* right rail: the selected event */}
+        {rightOpen && (
+          <div className="rail rail-detail">
+            <EventDetail
+              detail={detail}
+              loading={detailLoading}
+              onResolve={resolveEvent}
+              onClose={() => setSelectedId(null)}
+              resolving={resolving}
+            />
+          </div>
+        )}
       </div>
+
+      <FeedsBar overview={overview} />
 
       {briefingOpen && (
         <BriefingPanel
