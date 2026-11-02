@@ -333,7 +333,10 @@ async def build_briefing(session) -> dict:
             llm_summary, llm_status = await enrichment.maybe_llm_note(evidence)
             llm_model = settings.openrouter_model if llm_summary else None
             if llm_status == "misconfigured":
-                caveats.append("AI note unavailable: OPENROUTER_MODEL is not set to a real model id.")
+                caveats.append(
+                    "AI note unavailable: OPENROUTER_MODEL is empty or a placeholder. "
+                    "Set it to a model id, or use openrouter/free for the free router."
+                )
     except Exception as e:
         log.warning("briefing LLM note failed: %s", e)
         llm_status = "error"

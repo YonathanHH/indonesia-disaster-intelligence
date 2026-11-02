@@ -27,8 +27,10 @@ log = logging.getLogger(__name__)
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Model IDs that are placeholders, not real OpenRouter model IDs.
-PLACEHOLDER_MODELS = {"", "openrouter/free", "openrouter/auto", "free"}
+# Values that mean "operator has not chosen a model". `openrouter/free` (routes
+# among free models at random) and `openrouter/auto` (the Auto Router) are real,
+# routable IDs and must NOT be listed here.
+PLACEHOLDER_MODELS = {"", "free"}
 
 MIN_NOTE_CHARS = 80
 MAX_NOTE_CHARS = 900

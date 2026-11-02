@@ -96,7 +96,7 @@ async def test_llm_polish_wires_through(session, monkeypatch):
 async def test_llm_misconfigured_adds_caveat(session, monkeypatch):
     monkeypatch.setattr(magma, "get_volcanoes", _volc([]))
     monkeypatch.setattr(settings, "openrouter_api_key", "sk-or-test")
-    monkeypatch.setattr(settings, "openrouter_model", "openrouter/free")
+    monkeypatch.setattr(settings, "openrouter_model", "free")
     b = await briefing.build_briefing(session)
     assert b["llm_summary"] is None
     assert b["llm_status"] == "misconfigured"

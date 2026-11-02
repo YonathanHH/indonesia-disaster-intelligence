@@ -44,7 +44,7 @@ async def test_no_key_returns_off(monkeypatch):
 
 async def test_placeholder_model_returns_misconfigured(monkeypatch):
     monkeypatch.setattr(settings, "openrouter_api_key", "sk-or-test")
-    monkeypatch.setattr(settings, "openrouter_model", "openrouter/free")
+    monkeypatch.setattr(settings, "openrouter_model", "free")
     note, status = await enrichment.maybe_llm_note(_evidence())
     assert (note, status) == (None, "misconfigured")
 
@@ -135,3 +135,22 @@ def test_build_evidence_bounds_fields():
     assert len(ev["headline"]) <= 300
     assert len(ev["events"][0]["title"]) <= 160
     assert len(ev["events"][0]["region"]) <= 80
+
+
+def test_openrouter_routers_are_real_model_ids():
+    # openrouter/free selects among free models at random; openrouter/auto is the
+    # Auto Router. Both are routable, so neither may be treated as unset.
+    from app.services import enrichment
+
+    assert enrichment.is_model_configured("openrouter/free") is True
+    assert enrichment.is_model_configured("openrouter/auto") is True
+    assert enrichment.is_model_configured("z-ai/glm-5.2:free") is True
+
+
+def test_true_placeholders_still_rejected():
+    from app.services import enrichment
+
+    assert enrichment.is_model_configured("") is False
+    assert enrichment.is_model_configured("free") is False
+    assert enrichment.is_model_configured("  ") is False
+    assert enrichment.is_model_configured(None) is False
