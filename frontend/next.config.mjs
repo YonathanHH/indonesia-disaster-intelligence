@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+
+// `instrumentation.ts` starts the FastAPI backend alongside `next dev`, and the
+// dev server is the only thing that needs to forward to it: in a deployment,
+// Vercel's top-level rewrites route /api/v1/* straight to the api service.
 const backendUrl = (
   process.env.BACKEND_INTERNAL_URL ||
   `http://127.0.0.1:${process.env.BACKEND_PORT || "8000"}`
@@ -11,20 +15,15 @@ const nextConfig = {
   // builds: `STANDALONE_OUTPUT=1 npm run build`.
   output: process.env.STANDALONE_OUTPUT ? "standalone" : undefined,
 
-  // `instrumentation.ts` starts the FastAPI backend alongside `next dev`.
   experimental: {
     instrumentationHook: true,
   },
 
-  // Keep the browser on one origin: /api/v1/* is proxied to FastAPI, so there
-  // is no CORS setup and no NEXT_PUBLIC_API_URL to keep in sync.
   async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: `${backendUrl}/api/v1/:path*`,
-      },
-    ];
+    // Never baked into a production build: a function that proxies to
+    // 127.0.0.1:8000 would point at itself.
+    if (process.env.NODE_ENV === "production") return [];
+    return [{ source: "/api/v1/:path*", destination: `${backendUrl}/api/v1/:path*` }];
   },
 };
 
