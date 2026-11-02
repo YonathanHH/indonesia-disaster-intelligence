@@ -25,9 +25,6 @@ class Settings(BaseSettings):
     # Optional custom active-fault GeoJSON URL (LineString/MultiLineString).
     # Empty = faults layer reports unavailable (no open dataset covers Indonesia).
     faults_geojson_url: str = ""
-    # DuckDB sidecar for OLAP analytics. Primary store stays Postgres/SQLite;
-    # this file is rebuilt as a mirror on demand by /api/v1/analytics.
-    duckdb_path: str = "./analytics.duckdb"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

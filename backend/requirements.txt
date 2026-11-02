@@ -9,6 +9,4 @@ httpx==0.28.1
 python-dateutil==2.9.0
 pytest==8.4.1
 pytest-asyncio==1.1.0
-httpx
 anyio==4.10.0
-duckdb==1.2.2

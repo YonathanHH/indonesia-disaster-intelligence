@@ -281,11 +281,10 @@ async def escalation(session: AsyncSession = Depends(get_session)):
 
 @router.get("/analytics", response_model=AnalyticsOut)
 async def analytics(refresh: bool = True, session: AsyncSession = Depends(get_session)):
-    """OLAP analytics over a DuckDB sidecar mirror (disposable cache).
+    """Aggregate analytics over the primary store.
 
-    Primary store stays Postgres/SQLite; `refresh=true` (default) re-mirrors
-    `events` into the DuckDB file before aggregating. Pass
-    `refresh=false` to query the last snapshot without a re-mirror.
+    `refresh=true` (default) also counts observations; `refresh=false` skips
+    that one count. Nothing is mirrored to disk.
     """
     return await analytics_svc.get_analytics(session, refresh=refresh)
 
