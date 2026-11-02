@@ -68,6 +68,8 @@ class OverviewStats(BaseModel):
     tsunami_alerts: int
     last_update: datetime | None
     collectors: dict[str, dict[str, Any]]
+    last_brief_at: str | None = None
+    last_brief_llm_status: str | None = None
 
 
 class WatchItem(BaseModel):

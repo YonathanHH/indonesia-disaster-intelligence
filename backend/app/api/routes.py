@@ -6,16 +6,15 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.api import jobs as jobs_api
+from app.api import jobs
 from app.core.db import get_session
 from app.models import Event, EventHistory, IngestState, Observation
 from app.schemas import AnalyticsOut, BriefingOut, ChangesOut, ClusterOut, EscalationOut, EventDetailOut, EventListOut, FeedItem, OverviewStats, SituationOut
 from app.services import analytics as analytics_svc
-from app.services import briefing as briefing_svc
+from app.services import brief_store
 from app.services import change as change_svc
 from app.services import clustering as clustering_svc
 from app.services import history as history_svc
-from app.services import ingest as ingest_svc
 from app.services import overlays as overlays_svc
 from app.services import situations as situations_svc
 
@@ -50,9 +49,12 @@ async def status(session: AsyncSession = Depends(get_session)):
     for row in (await session.execute(select(IngestState))).scalars().all():
         collectors[row.collector] = {"last_run_at": row.last_run_at, "last_ok_at": row.last_ok_at,
                                      "last_error": row.last_error, "items_fetched": row.items_fetched}
+    brief = await brief_store.newest(session)
     return OverviewStats(active_events=active, high_priority=high, quakes_24h=quakes,
                          active_weather_alerts=wx, tsunami_alerts=tsu,
-                         last_update=last_obs, collectors=collectors)
+                         last_update=last_obs, collectors=collectors,
+                         last_brief_at=brief.generated_at.isoformat() if brief else None,
+                         last_brief_llm_status=brief.llm_status if brief else None)
 
 
 @router.get("/events", response_model=list[EventListOut])
@@ -152,15 +154,18 @@ async def feed(session: AsyncSession = Depends(get_session), limit: int = Query(
 
 @router.post("/ingest/run")
 async def ingest_run(session: AsyncSession = Depends(get_session)):
-    summary = await ingest_svc.run_ingest(session)
-    return summary
+    """On-load refresh. Unauthenticated by design — the claim interval is the
+    authorization, since a secret in client JS is not a secret."""
+    summary = await jobs.run_ingest_cycle(session, force=False)
+    rebuilt = await jobs.maybe_rebuild_brief(session)
+    return {**summary, "brief_rebuilt": rebuilt}
 
 
 @router.post("/events/{event_id}/resolve")
 async def resolve_event(
     event_id: str,
     session: AsyncSession = Depends(get_session),
-    _: None = Depends(jobs_api.require_operator),
+    _: None = Depends(jobs.require_operator),
 ):
     e = (await session.execute(select(Event).where(Event.id == event_id))).scalar_one_or_none()
     if e is None:
@@ -174,9 +179,16 @@ async def resolve_event(
 
 @router.get("/briefing", response_model=BriefingOut)
 async def briefing(session: AsyncSession = Depends(get_session)):
-    """Executive briefing: deterministic situation summary + watchlist +
-    recommended actions, with optional LLM polish when configured."""
-    return await briefing_svc.build_briefing(session)
+    """The stored executive brief: one indexed read, no collectors, no LLM call.
+
+    An empty table (fresh deploy, before any cron or visitor) builds once so the
+    drawer never shows an error on day one.
+    """
+    doc = await brief_store.current_document(session)
+    if doc is None:
+        row = await brief_store.build_and_store(session, kind="live")
+        doc = {**row.payload, "kind": row.kind}
+    return doc
 
 
 @router.get("/changes", response_model=ChangesOut)

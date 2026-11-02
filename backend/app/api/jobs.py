@@ -75,6 +75,30 @@ async def ensure_fresh_ingest(session) -> bool:
     return True
 
 
+async def maybe_rebuild_brief(session) -> bool:
+    """Rebuild the rolling brief when it no longer reflects the newest data.
+
+    Three conditions, and all must hold (spec §6): the stored brief predates the
+    newest successful ingest, the floor interval has passed, and this instance
+    wins the `brief` claim. That is what turns five dashboard loads in a minute
+    into one LLM call.
+    """
+    latest = await brief_store.newest(session)
+    ingest_at = await job_state.last_ok(session, job_state.KEY_INGEST)
+    now = datetime.now(timezone.utc)
+    if not brief_store.rebuild_needed(
+        latest, ingest_at, floor_seconds=settings.brief_min_rebuild_seconds, now=now
+    ):
+        return False
+    if not await job_state.try_claim(
+        session, job_state.KEY_BRIEF, settings.brief_min_rebuild_seconds
+    ):
+        return False
+    await brief_store.build_and_store(session, kind="live")
+    await job_state.mark_done(session, job_state.KEY_BRIEF)
+    return True
+
+
 @router.get("/jobs/nightly-ingest", dependencies=[Depends(require_cron)])
 async def nightly_ingest(session: AsyncSession = Depends(get_session)):
     """00:00 WIB. Collectors only — the 01:00 brief job owns the digest, so this
