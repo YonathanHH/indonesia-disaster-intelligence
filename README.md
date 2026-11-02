@@ -185,7 +185,11 @@ and available on all plans.
    `NEXT_PUBLIC_*`; the browser must not see them). `ALLOWED_ORIGINS` can stay empty.
 3. **Deploy.** `vercel` (preview) then promote. Crons attach to **production** only;
    confirm with `vercel crons list`.
-4. **Check.** `GET /api/v1/jobs/nightly-ingest` without the header must return `401`;
+4. **Region.** Functions default to `iad1` (Washington DC). The `api` service is pinned to
+   `sin1`, beside the Neon compute in `aws-ap-southeast-1`; check the response header
+   `x-vercel-id`, whose second segment is the region that actually ran the function. Hobby
+   allows one region only, so a longer array fails the deployment before the build.
+5. **Check.** `GET /api/v1/jobs/nightly-ingest` without the header must return `401`;
    with `Authorization: Bearer $CRON_SECRET` it returns the ingest summary.
    `GET /api/v1/briefing` must answer in well under a second — it reads a stored document.
 

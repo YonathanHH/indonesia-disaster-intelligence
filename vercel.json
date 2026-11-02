@@ -12,6 +12,7 @@
       "functions": {
         "app/main.py": {
           "maxDuration": 300,
+          "regions": ["sin1"],
           "excludeFiles": "{tests/**,**/*.test.py,**/test_*.py,*.db,*.duckdb}"
         }
       }
