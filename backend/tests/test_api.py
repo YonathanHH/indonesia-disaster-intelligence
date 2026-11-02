@@ -38,3 +38,21 @@ def test_unknown_route_404():
     c = TestClient(app, raise_server_exceptions=False)
     r = c.get("/api/v1/social/import")
     assert r.status_code in (404, 405)
+
+
+def test_no_resident_ingest_loop():
+    # A serverless function has no process to host `while True`; the loop must be
+    # gone, not merely disabled by config.
+    import inspect
+
+    import app.main as m
+
+    assert not hasattr(m, "_background_loop")
+    src = inspect.getsource(m.lifespan)
+    assert "create_task" not in src
+
+
+def test_cron_routes_are_registered():
+    paths = {getattr(r, "path", "") for r in app.routes}
+    assert "/api/v1/jobs/nightly-ingest" in paths
+    assert "/api/v1/jobs/nightly-brief" in paths
