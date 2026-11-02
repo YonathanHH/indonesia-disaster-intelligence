@@ -59,14 +59,12 @@ export default function BriefingPanel({
   loading,
   error,
   onClose,
-  onRefresh,
   onSelectEvent,
 }: {
   briefing: Briefing | null;
   loading: boolean;
   error?: string | null;
   onClose: () => void;
-  onRefresh: () => void;
   onSelectEvent: (id: string) => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -92,13 +90,12 @@ export default function BriefingPanel({
             <div className="drawer-label">Situation brief</div>
             <div className="drawer-title">Executive briefing</div>
             <div className="drawer-time">
-              {briefing ? fmtWIB(briefing.generated_at) : "—"} WIB
+              {briefing
+                ? `${briefing.kind === "daily" ? "Morning executive summary" : "Live brief"} · ${fmtWIB(briefing.generated_at)} WIB`
+                : "—"}
             </div>
           </div>
           <div className="drawer-actions">
-            <button className="btn" onClick={onRefresh} title="Regenerate briefing">
-              Regenerate
-            </button>
             <button className="btn btn-quiet" ref={closeRef} onClick={onClose} title="Close (Esc)">
               Close
             </button>
@@ -116,7 +113,7 @@ export default function BriefingPanel({
         {!loading && error && !briefing && (
           <div className="brief-body">
             <p className="prose" style={{ marginTop: 0 }}>Briefing unavailable: {error}</p>
-            <button className="btn" onClick={onRefresh}>Try again</button>
+            <button className="btn" onClick={onClose}>Close</button>
           </div>
         )}
 

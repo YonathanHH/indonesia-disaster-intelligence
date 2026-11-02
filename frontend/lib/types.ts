@@ -234,6 +234,7 @@ export type ActionItem = {
 
 export type Briefing = {
   generated_at: string;
+  kind?: "daily" | "live";
   headline: string;
   overview: string[];
   watchlist: WatchItem[];

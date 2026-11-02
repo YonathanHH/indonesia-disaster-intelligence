@@ -23,7 +23,11 @@ export const api = {
   analytics: (refresh = false) =>
     get<import("./types").Analytics>(`/api/v1/analytics?refresh=${refresh ? "true" : "false"}`),
   ingest: () =>
-    fetch(`${BASE}/api/v1/ingest/run`, { method: "POST" }).then((r) => r.json()),
+    fetch(`${BASE}/api/v1/ingest/run`, { method: "POST" })
+      .then((r) => r.json() as Promise<{ skipped?: string; quakes: number; weather: number; brief_rebuilt: boolean }>)
+      // The background refresh is unawaited, so a rejection here would surface as
+      // an unhandled promise error in the console.
+      .catch(() => ({ skipped: "unreachable", quakes: 0, weather: 0, brief_rebuilt: false })),
   resolve: (id: string) =>
     fetch(`${BASE}/api/v1/events/${id}/resolve`, { method: "POST" }).then((r) => r.json()),
 };

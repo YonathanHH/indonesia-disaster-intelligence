@@ -55,12 +55,12 @@ export default function Dashboard() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
   const [kpi, setKpi] = useState<KpiKey | null>(null);
-  const [ingesting, setIngesting] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const changesSinceRef = useRef<number | null>(null);
   const analyticsLoadRef = useRef<Promise<void> | null>(null);
+  const refreshedRef = useRef(false);
 
   const toggleKpi = useCallback(
     (key: KpiKey) => setKpi((prev) => (prev === key ? null : key)),
@@ -124,9 +124,9 @@ export default function Dashboard() {
     }
   }, []);
 
-  // One analytics request at a time per page: concurrent readers of the DuckDB
-  // sidecar can collide, and a failed read must not immediately trigger a
-  // refresh while another tab may already be rewriting the snapshot.
+  // One analytics request at a time per page: a refresh recomputes the aggregates
+  // from the event table, and a failed read must not immediately retry while
+  // another tab may already be triggering the same recompute.
   const loadAnalytics = useCallback(async (refresh = false) => {
     if (analyticsLoadRef.current) {
       if (!refresh) return analyticsLoadRef.current;
@@ -183,21 +183,22 @@ export default function Dashboard() {
     }
   }, [typeF, prioF, qDeb]);
 
-  const runIngest = useCallback(async () => {
-    setIngesting(true);
-    try {
-      await api.ingest();
-      await load();
-      loadEscalation();
-      loadClusters();
-      loadAnalytics(true);
-      loadChanges();
-    } catch {
-      setErr("Ingest failed. Is the backend running on :8000?");
-    } finally {
-      setIngesting(false);
-    }
-  }, [load, loadEscalation, loadClusters, loadAnalytics, loadChanges]);
+  // The server decides whether this is a real fetch (atomic claim) and whether a
+  // brief rebuild is due, so the client always asks and never reasons about age.
+  // Fire-and-forget: a rebuild can take ~25s, which must not block first paint.
+  const refreshInBackground = useCallback(async () => {
+    // The mount effect re-runs whenever a filter changes; one ask per page load.
+    if (refreshedRef.current) return;
+    refreshedRef.current = true;
+    const res = await api.ingest();
+    if (res.skipped) return;
+    await load();
+    loadEscalation();
+    loadClusters();
+    loadAnalytics(true);
+    loadChanges();
+    if (res.brief_rebuilt && briefingOpen) loadBriefing();
+  }, [load, loadEscalation, loadClusters, loadAnalytics, loadChanges, briefingOpen, loadBriefing]);
 
   const resolveEvent = useCallback(
     async (id: string) => {
@@ -217,9 +218,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     load();
+    refreshInBackground();
     const t = setInterval(load, 60000);
     return () => clearInterval(t);
-  }, [load]);
+  }, [load, refreshInBackground]);
 
   // posture, sequences and the since-last-visit delta change on a slower cadence
   // than the event list; analytics is refreshed once and after each ingest.
@@ -384,9 +386,8 @@ export default function Dashboard() {
       <TopBar
         overview={overview}
         escalation={escalation}
-        loading={loading || ingesting}
+        loading={loading}
         err={err}
-        onIngest={runIngest}
         onBriefing={openBriefing}
         onPosture={openBriefing}
       />
@@ -394,7 +395,7 @@ export default function Dashboard() {
       {err && (
         <div className="errbanner" role="alert">
           <span className="grow">
-            {err} Start the backend with <code>uvicorn app.main:app</code>, then press Ingest.
+            {err} Locally, start the backend with <code>uvicorn app.main:app</code>.
           </span>
           <button className="btn" onClick={load}>Retry</button>
         </div>
@@ -554,7 +555,6 @@ export default function Dashboard() {
           loading={briefingLoading}
           error={briefingErr}
           onClose={() => setBriefingOpen(false)}
-          onRefresh={loadBriefing}
           onSelectEvent={setSelectedId}
         />
       )}

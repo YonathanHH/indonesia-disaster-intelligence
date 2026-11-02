@@ -13,7 +13,6 @@ export default function TopBar({
   escalation,
   loading,
   err,
-  onIngest,
   onBriefing,
   onPosture,
 }: {
@@ -21,7 +20,6 @@ export default function TopBar({
   escalation: Escalation | null;
   loading: boolean;
   err: string | null;
-  onIngest: () => void;
   onBriefing: () => void;
   onPosture: () => void;
 }) {
@@ -83,9 +81,6 @@ export default function TopBar({
       </div>
 
       <div className="topbar-actions">
-        <button className="btn" onClick={onIngest} title="Run all BMKG collectors now">
-          Ingest
-        </button>
         <button className="btn btn-primary" onClick={onBriefing} title="Open the executive briefing">
           Briefing
         </button>
