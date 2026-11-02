@@ -174,6 +174,7 @@ class BriefingOut(BaseModel):
     llm_summary: str | None = None
     llm_model: str | None = None
     llm_status: str | None = None
+    kind: str = "live"  # "daily" = the 01:00 WIB cron, "live" = rebuilt on new ingest
     caveats: list[str]
 
 

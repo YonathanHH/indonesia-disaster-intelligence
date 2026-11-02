@@ -6,6 +6,7 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.api import jobs as jobs_api
 from app.core.db import get_session
 from app.models import Event, EventHistory, IngestState, Observation
 from app.schemas import AnalyticsOut, BriefingOut, ChangesOut, ClusterOut, EscalationOut, EventDetailOut, EventListOut, FeedItem, OverviewStats, SituationOut
@@ -156,7 +157,11 @@ async def ingest_run(session: AsyncSession = Depends(get_session)):
 
 
 @router.post("/events/{event_id}/resolve")
-async def resolve_event(event_id: str, session: AsyncSession = Depends(get_session)):
+async def resolve_event(
+    event_id: str,
+    session: AsyncSession = Depends(get_session),
+    _: None = Depends(jobs_api.require_operator),
+):
     e = (await session.execute(select(Event).where(Event.id == event_id))).scalar_one_or_none()
     if e is None:
         raise HTTPException(404, "event not found")
