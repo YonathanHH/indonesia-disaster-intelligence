@@ -29,6 +29,7 @@ htmlcov/
 # ---- node / next ----
 node_modules/
 .next/
+.vercel/
 out/
 dist/
 build/
@@ -50,3 +51,6 @@ Thumbs.db
 *.swp
 *.swo
 .neon
+
+.vercel
+.env*
