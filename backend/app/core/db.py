@@ -9,6 +9,7 @@ dependency — lat/lon float columns are the portable source of truth,
 with an optional generated geography column created on postgres.
 """
 import logging
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -19,12 +20,39 @@ from app.core.config import settings
 log = logging.getLogger(__name__)
 
 
+def driver_url(url: str) -> str:
+    """Rewrite a provider's connection string into what asyncpg actually accepts.
+
+    Neon ships `sslmode` and `channel_binding`, and SQLAlchemy forwards every
+    query parameter to asyncpg.connect() — which raises TypeError on either name.
+    A bare `postgresql://` is worse: create_async_engine() reads it as psycopg2,
+    a sync driver we do not install, so the engine cannot even be built.
+    """
+    if not url.startswith("postgresql"):
+        return url
+    parts = urlsplit(url)
+    kept, changed = [], False
+    for key, value in parse_qsl(parts.query):
+        if key == "channel_binding":
+            changed = True
+            continue
+        if key == "sslmode":
+            key, changed = "ssl", True
+        kept.append((key, value))
+    scheme = parts.scheme
+    if scheme == "postgresql":
+        scheme, changed = "postgresql+asyncpg", True
+    if not changed:
+        return url
+    return urlunsplit((scheme, parts.netloc, parts.path, urlencode(kept), parts.fragment))
+
+
 class Base(DeclarativeBase):
     pass
 
 
 engine = create_async_engine(
-    settings.database_url,
+    driver_url(settings.database_url),
     pool_pre_ping=True,
     future=True,
     # asyncpg prepares statements by default, which a transaction pooler such as

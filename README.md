@@ -142,7 +142,7 @@ Backend (`backend/.env`, see `backend/.env.example`):
 
 | Var | Default | Notes |
 |-----|---------|-------|
-| `DATABASE_URL` | `sqlite+aiosqlite:///./bmkgintel.db` | `postgresql+asyncpg://…` for prod/PostGIS (Neon: use the **direct**, non-pooled URL) |
+| `DATABASE_URL` | `sqlite+aiosqlite:///./bmkgintel.db` | Neon's pooled `postgresql://…` URL, pasted verbatim (the engine adapts it) |
 | `BMKG_HTTP_TIMEOUT` | `15` | Upstream fetch timeout (s) |
 | `INGEST_INTERVAL_SECONDS` | `300` | Minimum seconds between real ingests (the on-load refresh guard); respects BMKG 60 req/min/IP |
 | `BRIEF_MIN_REBUILD_SECONDS` | `900` | Floor between stored-brief rebuilds, independent of how often ingest runs |
@@ -171,12 +171,15 @@ Never commit `.env` / `.env.local` — they are gitignored. CI uses examples/def
 `/api/v1/*` to `api` and everything else to `web`, and the two crons. Services are in Beta
 and available on all plans.
 
-1. **Storage.** Install Neon from the Vercel Marketplace and set `DATABASE_URL` to its
-   **direct** (non-pooled) `postgresql+asyncpg://…` URL. The engine runs with
-   `statement_cache_size = 0`, so a transaction-pooling URL also works if you hit Neon's
-   connection ceiling — but the direct URL is the simpler default for a nightly job.
-   PostGIS is optional: if the role cannot `CREATE EXTENSION postgis`, the app logs it and
-   keeps the portable lat/lon columns.
+1. **Storage.** Provision Neon (`neon init` + `neon deploy` pull its URLs into `.env.local`)
+   and set `DATABASE_URL` on the project to the **pooled** (`-pooler`) URL: serverless
+   functions open a fresh connection per cold start, and PgBouncer absorbs that. Paste it
+   verbatim — the engine rewrites the libpq-only parts asyncpg cannot accept (`sslmode` →
+   `ssl`, `channel_binding` dropped, bare `postgresql://` → `postgresql+asyncpg://`) and runs
+   with `statement_cache_size = 0`, which transaction pooling requires. Create the schema over
+   the **direct** URL (`DATABASE_URL_UNPOOLED`) instead; pooling is for query traffic, not DDL.
+   PostGIS is optional: Neon installs it, and if a role cannot `CREATE EXTENSION postgis`, the
+   app logs it and keeps the portable lat/lon columns.
 2. **Secrets.** Set `CRON_SECRET`, `OPERATOR_SECRET`, `OPENROUTER_API_KEY`,
    `OPENROUTER_MODEL=openrouter/free` in the project's Environment Variables (never as
    `NEXT_PUBLIC_*`; the browser must not see them). `ALLOWED_ORIGINS` can stay empty.
