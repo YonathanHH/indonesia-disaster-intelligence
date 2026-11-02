@@ -7,6 +7,15 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./bmkgintel.db"
     bmkg_http_timeout: int = 15
     ingest_interval_seconds: int = 300
+    # Floor between brief rebuilds, independent of how often ingest runs.
+    brief_min_rebuild_seconds: int = 900
+    # Vercel sends CRON_SECRET as `Authorization: Bearer <value>` on cron hits.
+    # Unset = every job call is rejected (fail closed), not "allow everyone".
+    cron_secret: str = ""
+    operator_secret: str = ""
+    # Comma-separated exact origins. Empty means no cross-origin grants, which is
+    # correct because Vercel service routing keeps the browser same-origin.
+    allowed_origins: str = ""
     # Optional LLM rephrase via OpenRouter (OpenAI-compatible API).
     # Get a key at https://openrouter.ai/keys — free models need no credits.
     openrouter_api_key: str = ""
@@ -25,6 +34,10 @@ class Settings(BaseSettings):
     @property
     def is_postgres(self) -> bool:
         return self.database_url.startswith("postgresql")
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
 
 settings = Settings()

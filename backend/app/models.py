@@ -86,3 +86,38 @@ class IngestState(Base):
     last_ok_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     items_fetched: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Briefing(Base):
+    """A stored executive brief. `payload` is the complete BriefingOut document,
+    so the read path never recomputes and the client contract is unchanged."""
+
+    __tablename__ = "briefings"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    kind: Mapped[str] = mapped_column(String(16), index=True)  # daily | live
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    # The ingest this document reflects: job_state(key='ingest').last_ok_at at build
+    # time. NULL means "built with no recorded ingest", which always looks stale.
+    based_on_ingest_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    llm_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    llm_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class JobState(Base):
+    """One row per scheduled key, used as an atomic cross-instance claim.
+
+    Serverless runs many instances and Vercel can deliver the same cron run twice,
+    so `try_claim` is a conditional UPDATE: the instance whose statement reports
+    rowcount == 1 owns the work. `claimed_at` gates the interval; `last_ok_at` is
+    the reference every freshness comparison reads.
+    """
+
+    __tablename__ = "job_state"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)  # ingest | brief
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_ok_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
